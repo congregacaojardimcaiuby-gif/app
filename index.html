@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Programação da congregação</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,600;7..72,700&display=swap">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F3F4F2; --card:#FFFFFF; --ink:#1E2328; --muted:#626A70; --line:#DDE0DC;
+  --campo:#F7F8F6;
+  --tes:#56666F; --min:#9A6D12; --vid:#842A31;
+  --tes-t:#46565F; --min-t:#8A600C; --vid-t:#842A31;
+  --hl:#FFF4CF; --mark:#FFE08A; --foco:#2F6FB3;
+  --c-ms:#842A31; --c-fs:#2F6F82; --c-av:#B58124; --c-in:#3E7D52; --c-lp:#5B6672; --c-rm:#7A4A78;
+  --verde:#3D8F5E;
+  --font:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Literata',Georgia,'Times New Roman',serif;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181B; --card:#1D2125; --ink:#ECEEEC; --muted:#A1A8AD; --line:#30363B; --campo:#23282D;
+    --tes-t:#A9B9C2; --min-t:#E0B55A; --vid-t:#E48A91;
+    --hl:rgba(224,181,90,.14); --mark:rgba(224,181,90,.42); --foco:#7FB2E8; --verde:#4FBE7A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181B; --card:#1D2125; --ink:#ECEEEC; --muted:#A1A8AD; --line:#30363B; --campo:#23282D;
+  --tes-t:#A9B9C2; --min-t:#E0B55A; --vid-t:#E48A91;
+  --hl:rgba(224,181,90,.14); --mark:rgba(224,181,90,.42); --foco:#7FB2E8; --verde:#4FBE7A;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--foco);outline-offset:2px;border-radius:6px}
+
+.topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.topo .in{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.faixas{display:flex;flex-direction:column;gap:3px;flex:none}
+.faixas i{display:block;width:26px;height:6px;border-radius:2px}
+.marca{flex:1;min-width:0}
+.marca strong{display:block;font-family:var(--serif);font-size:19px;line-height:1.2}
+.marca span{font-size:14px;color:var(--muted)}
+
+main{max-width:760px;margin:0 auto;padding:18px 16px 48px}
+
+.busca{position:relative;margin-bottom:14px}
+.busca label{display:block;font-weight:700;margin-bottom:6px}
+.busca input{width:100%;padding:13px 44px 13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card)}
+.busca input:focus{border-color:var(--foco);outline:none}
+.busca .limpar{position:absolute;right:6px;bottom:6px;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:22px;cursor:pointer}
+
+.minhas{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--min);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.minhas h2{font-family:var(--serif);font-size:18px;margin:0 0 6px}
+.minhas ul{list-style:none;margin:0;padding:0}
+.minhas li+li{border-top:1px solid var(--line)}
+.minhas li button,.minhas li a{display:grid;grid-template-columns:92px 1fr;gap:10px;width:100%;text-align:left;background:none;border:0;padding:9px 0;cursor:pointer;text-decoration:none;color:inherit}
+.minhas .quando{font-weight:700;color:var(--vid-t)}
+.minhas .oque small{display:block;color:var(--muted);font-size:14px}
+.minhas p{margin:4px 0;color:var(--muted)}
+
+.voltar{display:inline-block;margin-bottom:14px;font-weight:700;font-size:15px;color:var(--muted);text-decoration:none}
+.voltar:hover{color:var(--ink)}
+
+.hub-grade{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;list-style:none;padding:0}
+.hub-card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;min-height:128px;position:relative;overflow:hidden}
+.hub-card .faixa{position:absolute;left:0;top:0;bottom:0;width:5px}
+.hub-card h2{font-family:var(--serif);font-size:18.5px;line-height:1.28;margin:0 0 6px;text-wrap:balance;padding-left:5px}
+.hub-card p{margin:0;font-size:13.5px;color:var(--muted);padding-left:5px}
+.hub-card:active{background:var(--campo)}
+@media (max-width:360px){.hub-grade{grid-template-columns:1fr}}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 15px;font-weight:700;font-size:15px;color:var(--muted);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip .agora{display:inline-block;width:7px;height:7px;border-radius:50%;background:#3A9A5B;margin-left:7px;vertical-align:middle}
+
+.semana{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sem-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 12px;padding:20px 18px 16px}
+.sem-cab h2{font-family:var(--serif);font-size:clamp(22px,6vw,28px);line-height:1.18;margin:0;text-wrap:balance}
+.sem-cab p{margin:4px 0 0;font-size:17px;color:var(--vid-t);font-weight:700}
+.data-reuniao{flex:none;font-weight:700;font-size:14.5px;color:var(--muted);background:var(--campo);border:1px solid var(--line);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.equipe{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.equipe div{padding:10px 18px}
+.equipe div+div{border-left:1px solid var(--line)}
+.equipe small{display:block;font-size:14px;color:var(--muted)}
+.equipe b{font-size:17px}
+.equipe .hl{background:var(--hl)}
+.simples{display:flex;justify-content:space-between;gap:12px;padding:9px 18px;border-top:1px solid var(--line);font-size:16px}
+.simples span:last-child{color:var(--muted);white-space:nowrap}
+
+.bloco h3{margin:0;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;padding:8px 18px}
+.b-T h3{background:var(--tes)} .b-M h3{background:var(--min)} .b-V h3{background:var(--vid)}
+.b-T{--ct:var(--tes-t)} .b-M{--ct:var(--min-t)} .b-V{--ct:var(--vid-t)}
+.parte{display:grid;grid-template-columns:30px 1fr;gap:2px 12px;padding:12px 18px;border-top:1px solid var(--line)}
+.bloco h3+.parte{border-top:0}
+.parte.hl{background:var(--hl)}
+.num{grid-row:span 2;width:28px;height:28px;border-radius:50%;border:2px solid var(--ct);color:var(--ct);font-weight:700;font-size:14px;display:grid;place-items:center}
+.tit{font-weight:700;line-height:1.3}
+.min{font-size:14px;color:var(--muted)}
+.quem{grid-column:2;margin-top:4px}
+.papel{display:block;font-size:13.5px;color:var(--muted)}
+.nomes{font-weight:700;color:var(--ct)}
+.vazio{color:var(--muted);font-weight:400}
+mark{background:var(--mark);color:inherit;border-radius:4px;padding:0 3px}
+@media (min-width:640px){
+  .parte{grid-template-columns:30px 1fr minmax(190px,38%)}
+  .quem{grid-column:3;grid-row:1 / span 2;margin-top:0;text-align:right}
+}
+
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 7px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-family:var(--serif);font-weight:600;color:var(--muted);font-size:13.5px}
+tr.atual{background:var(--hl)}
+.rolagem{overflow-x:auto}
+.rolagem table{min-width:400px}
+.tabela-edit{overflow-x:auto;margin:10px 0}
+.tabela-edit table{min-width:460px}
+.tabela-edit td{padding:5px 6px}
+.tabela-edit input,.tabela-edit select{width:100%;padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;background:var(--campo);font-size:15px}
+.tabela-edit input:focus,.tabela-edit select:focus{border-color:var(--foco);outline:none}
+.tabela-edit input:disabled{opacity:.4;background:transparent}
+.tabela-edit td.centro{text-align:center}
+.tabela-edit input[type="checkbox"]{width:19px;height:19px;accent-color:var(--foco);cursor:pointer;margin:0}
+
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
+.pill-entregue{color:var(--min-t);border-color:var(--min-t);background:var(--hl)}
+.pill-validado{color:var(--verde);border-color:var(--verde);background:rgba(61,143,94,.14)}
+
+.aviso{background:var(--card);border:1px dashed var(--min);border-radius:12px;padding:10px 14px;font-size:15px;color:var(--muted);margin-bottom:16px}
+.aviso b{color:var(--ink)}
+.aviso a{color:var(--ink)}
+.painel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.painel h2{font-family:var(--serif);font-size:21px;margin:0 0 12px}
+.linha-acoes{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.linha-acoes h2{margin:0}
+.btn{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.perigo{color:#B3261E;border-color:rgba(179,38,30,.35)}
+.btn.ico{width:38px;height:38px;padding:0;display:inline-grid;place-items:center}
+.lista-sem{list-style:none;margin:0;padding:0}
+.lista-sem li{display:flex;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.lista-sem li:first-child{border-top:0}
+.lista-sem .txt{flex:1;min-width:0}
+.lista-sem .txt small{display:block;color:var(--muted);font-size:14px}
+.grade{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.campo label{display:block;font-size:14px;font-weight:700;margin-bottom:4px}
+.campo input,.campo select{width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;background:var(--campo)}
+.campo input:focus,.campo select:focus{border-color:var(--foco);outline:none}
+.campo input:disabled,.campo select:disabled{opacity:.45}
+.campo .dica{font-size:13px;color:var(--muted);margin-top:3px}
+.radios{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.radios label{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:7px 13px;font-weight:700;font-size:14px;cursor:pointer}
+.radios label:has(input:checked){border-color:var(--ink);background:var(--campo)}
+.radios input{width:auto}
+.ed-bloco{margin-top:18px}
+.ed-bloco h3{margin:0 0 8px;padding:7px 12px;border-radius:8px;color:#fff;font-size:15px}
+.ed-parte{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--campo);display:grid;gap:10px}
+.ed-l1{display:grid;grid-template-columns:1fr 84px;gap:10px}
+.ed-l2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.ed-l3{display:flex;gap:8px;justify-content:flex-end}
+.rodape-ed{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+
+footer{max-width:760px;margin:0 auto;padding:0 16px 32px;text-align:center;font-size:15px}
+footer a{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:10px;font-weight:700;transition:transform .25s;z-index:50;max-width:90vw}
+.toast.on{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media print{.topo,.busca,.chips,.minhas,footer,.voltar{display:none}.semana{border:0}}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="in">
+    <div class="faixas" aria-hidden="true"><i style="background:var(--tes)"></i><i style="background:var(--min)"></i><i style="background:var(--vid)"></i></div>
+    <div class="marca">
+      <strong id="t-titulo">Programação da congregação</strong>
+      <span id="t-sub">Escalas e designações</span>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+<footer><a id="troca" href="#admin">Área do administrador</a></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Camada de dados
+   R3: dados de exemplo iniciais que já viraram a planilha do
+   Google (a fonte de dados de verdade agora é a API_URL, logo
+   abaixo). Este objeto fica só de referência do formato.
+   Toda designação (pessoa) vem do cadastro DB.pessoas.
+   ============================================================ */
+const SECOES = { T:'Tesouros da Palavra de Deus', M:'Faça seu melhor no ministério', V:'Nossa vida cristã' };
+const TIPOS = ['', 'Estudante', 'Estudante/ajudante', 'Dirigente/leitor'];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+const HUB_DEFS = [
+  { key:'ms', titulo:'Reunião de meio de semana', cor:'var(--c-ms)' },
+  { key:'fs', titulo:'Reunião de fim de semana', cor:'var(--c-fs)' },
+  { key:'av', titulo:'Áudio, vídeo e volantes', cor:'var(--c-av)' },
+  { key:'in', titulo:'Indicadores', cor:'var(--c-in)' },
+  { key:'lp', titulo:'Limpeza semanal e periódica', cor:'var(--c-lp)' },
+  { key:'rm', titulo:'Entrega de relatórios mensais', cor:'var(--c-rm)' }
+];
+const NOMES_MOD = Object.fromEntries(HUB_DEFS.map(h => [h.key, h.titulo]));
+
+const MODULOS_SIMPLES = {
+  fs: { titulo:'Reunião de fim de semana', tabela:'fimDeSemana', campos:[
+        { k:'presidente', label:'Presidente', tipo:'pessoa', flag:'podePresidente' }, { k:'leitor', label:'Leitor de A Sentinela', tipo:'pessoa', flag:'podeLeitorSentinela' } ] },
+  av: { titulo:'Áudio, vídeo e volantes', tabela:'multimidia', comDiaSemana:true, campos:[
+        { k:'mesa', label:'Mesa (multimídia)', tipo:'pessoa', flag:'podeMesa' }, { k:'volante1', label:'Volante 1', tipo:'pessoa', flag:'podeVolante' }, { k:'volante2', label:'Volante 2', tipo:'pessoa', flag:'podeVolante' } ] },
+  in: { titulo:'Indicadores', tabela:'indicadores', comDiaSemana:true, campos:[
+        { k:'indicador1', label:'Indicador 1', tipo:'pessoa', flag:'podeIndicador' }, { k:'indicador2', label:'Indicador 2', tipo:'pessoa', flag:'podeIndicador' } ] }
+};
+
+const p = (secao, titulo, min, tipo, nome, ajudante='') => ({ secao, titulo, min, tipo, nome, ajudante });
+const MODELO_PARTES_MS = [
+  p('T','',10,'',''), p('T','Joias espirituais',10,'',''), p('T','Leitura da Bíblia',4,'Estudante',''),
+  p('M','Iniciando conversas',3,'Estudante/ajudante',''), p('M','Cultivando interesse',4,'Estudante/ajudante',''),
+  p('M','Explicando suas crenças',5,'Estudante/ajudante',''),
+  p('V','',15,'',''), p('V','Estudo bíblico de congregação',30,'Dirigente/leitor','')
+];
+
+/* ============================================================
+   R3: a base agora é a planilha do Google, via Apps Script.
+   API_URL é o endereço /exec da implantação como App da Web.
+   ============================================================ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbwJyMTYbBRsfGUVItuEfQ6zMkIuOhOkYH86bDg9Wik1d4SG-F6EOyXA60VtbVqpG-Ke/exec';
+
+const Dados = {
+  // Leitura pública via JSONP — contorna o bloqueio de CORS.
+  // O servidor recebe ?callback=_cb e responde: _cb({"ok":true,"dados":{...}})
+  async carregar(){
+    return new Promise((resolve, reject) => {
+      const nome = '_cb' + Date.now();
+      const script = document.createElement('script');
+      const timer = setTimeout(() => {
+        cleanup(); reject(new Error('A planilha demorou demais. Verifique sua conexão.'));
+      }, 20000);
+      function cleanup(){ delete window[nome]; script.remove(); clearTimeout(timer); }
+      window[nome] = data => {
+        cleanup();
+        if (data && data.ok) resolve(data.dados);
+        else reject(new Error((data && data.erro) || 'Resposta inválida da planilha.'));
+      };
+      script.src = API_URL + '?callback=' + nome;
+      script.onerror = () => { cleanup(); reject(new Error('Não foi possível alcançar a planilha.')); };
+      document.head.appendChild(script);
+    });
+  },
+  // Grava o estado atual de DB. O servidor confere o PIN de novo e só grava
+  // as abas do escopo daquele PIN, mesmo que DB tenha outras áreas juntas.
+  async salvar(){
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita pre-flight de CORS
+      body: JSON.stringify({ acao:'salvar', pin: st.pin, dados: DB })
+    });
+    const json = await resp.json();
+    if (!json.ok) throw new Error(json.erro || 'Erro ao salvar.');
+    DB = json.dados; // adota a versão mais recente vinda da planilha
+    return true;
+  },
+  // Envio de relatório mensal: não pede PIN, só grava/atualiza uma linha.
+  async enviarRelatorio(registro){
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ acao:'relatorio', registro })
+    });
+    const json = await resp.json();
+    if (!json.ok) throw new Error(json.erro || 'Erro ao enviar relatório.');
+    return json.id;
+  }
+};
+
+/* ============================================================ utilidades gerais */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const paraData = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+const paraIso = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+const somaDias = (iso, n) => { const d = paraData(iso); d.setDate(d.getDate()+n); return paraIso(d); };
+const hojeIso = () => paraIso(new Date());
+const dataCurta = iso => { const d = paraData(iso); return `${String(d.getDate()).padStart(2,'0')} ${MESES[d.getMonth()].slice(0,3)}`; };
+const DIAS_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const diaSemana = iso => DIAS_SEMANA[paraData(iso).getDay()];
+const dataDDMMAAAA = iso => { const d = paraData(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; };
+const mesAnoLegivel = mA => { if (!mA) return ''; const [y,m] = mA.split('-').map(Number); return `${MESES[m-1]} de ${y}`; };
+const mesAtualISO = () => { const h = new Date(); return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`; };
+
+function rotuloLongo(w){
+  const a = paraData(w.inicio), b = paraData(w.fim);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()} a ${b.getDate()} de ${MESES[b.getMonth()]}`
+    : `${a.getDate()} de ${MESES[a.getMonth()]} a ${b.getDate()} de ${MESES[b.getMonth()]}`;
+}
+function rotuloCurto(w){
+  const a = paraData(w.inicio), b = paraData(w.fim);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ${MESES[b.getMonth()].slice(0,3)}`
+    : `${a.getDate()} ${MESES[a.getMonth()].slice(0,3)}–${b.getDate()} ${MESES[b.getMonth()].slice(0,3)}`;
+}
+const ehSemanaAtual = w => w.inicio <= hojeIso() && hojeIso() <= w.fim;
+
+/* "Osmar L." casa com "Osmar Leandro" — segue útil na busca por nome */
+function casa(nome, filtro){
+  const n = norm(nome), f = norm(filtro);
+  if (!n || f.length < 2) return false;
+  if (n.includes(f)) return true;
+  const tn = n.split(/[\s.]+/).filter(Boolean), tf = f.split(/[\s.]+/).filter(Boolean);
+  if (tn[0] !== tf[0]) return false;
+  if (!tn[1] || !tf[1]) return false;
+  return tn[1].startsWith(tf[1]) || tf[1].startsWith(tn[1]);
+}
+
+const ordenadas = () => [...DB.semanasMS].sort((a,b) => a.inicio.localeCompare(b.inicio));
+const partesOrd = w => ['T','M','V'].flatMap(s => w.partes.filter(x => x.secao === s));
+function semanaPadrao(ws){
+  const h = hojeIso();
+  return (ws.find(ehSemanaAtual) || ws.find(w => w.inicio > h) || ws[ws.length-1]).id;
+}
+const statusPeriodica = data => (data && data < hojeIso()) ? 'Concluído' : 'Programado';
+function idAtualPorCampo(linhas, campo){
+  if (!linhas.length) return null;
+  const h = hojeIso();
+  const fut = linhas.filter(x => x[campo] >= h).sort((a,b) => a[campo].localeCompare(b[campo]))[0];
+  return fut ? fut[campo] : linhas[linhas.length-1][campo];
+}
+
+/* -------- cadastro de publicadores: fonte única de nomes e grupos para todo o app */
+function nomesFiltrados(flag){
+  return DB.pessoas.filter(x => !flag || x[flag]).map(x => x.nome).filter(Boolean).sort((a,b) => a.localeCompare(b,'pt-BR'));
+}
+function todasPessoas(){ return nomesFiltrados(null); }
+function gruposUnicos(){ return [...new Set(DB.pessoas.map(x => x.grupo).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR')); }
+function opcoesPessoasComRotulo(rotuloVazio, selecionado, flag){
+  return `<option value="">${esc(rotuloVazio)}</option>` + nomesFiltrados(flag).map(n => `<option value="${esc(n)}" ${n===selecionado?'selected':''}>${esc(n)}</option>`).join('');
+}
+const opcoesPessoas = (selecionado, flag) => opcoesPessoasComRotulo('— a definir —', selecionado, flag);
+function opcoesGrupos(selecionado){
+  return '<option value="">— a definir —</option>' + gruposUnicos().map(g => `<option value="${esc(g)}" ${g===selecionado?'selected':''}>${esc(g)}</option>`).join('');
+}
+function avisoSemPessoas(){
+  return DB.pessoas.length ? '' : '<div class="aviso"><b>Nenhum publicador cadastrado.</b> Cadastre em <a href="#admin:pessoas">Cadastro de publicadores</a> antes de montar as escalas.</div>';
+}
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200);
+}
+function sessaoEscopo(v){
+  try {
+    if (v === undefined) return sessionStorage.getItem('reuniao-cong-escopo') || '';
+    v ? sessionStorage.setItem('reuniao-cong-escopo', v) : sessionStorage.removeItem('reuniao-cong-escopo');
+  } catch(e){}
+  return v;
+}
+function sessaoPin(v){
+  try {
+    if (v === undefined) return sessionStorage.getItem('reuniao-cong-pin') || '';
+    v ? sessionStorage.setItem('reuniao-cong-pin', v) : sessionStorage.removeItem('reuniao-cong-pin');
+  } catch(e){}
+  return v;
+}
+function checarPin(pin){
+  pin = (pin||'').trim(); if (!pin) return '';
+  if (pin === DB.config.pinMestre) return 'todos';
+  for (const h of HUB_DEFS) if (DB.config.pins[h.key] && pin === DB.config.pins[h.key]) return h.key;
+  return '';
+}
+
+/* ============================================================ estado e rotas */
+let DB = null;
+const st = { semana:null, filtro:'', filtroHub:'', escopo:sessaoEscopo(), pin:sessaoPin(), draft:null, editId:null, foco:null, mesAdmin:null };
+
+function parseHash(){
+  const h = (location.hash || '').slice(1);
+  if (!h) return { area:'hub', mod:null };
+  const i = h.indexOf(':');
+  const area = i < 0 ? h : h.slice(0,i);
+  const mod = i < 0 ? null : h.slice(i+1);
+  if (area === 'admin') return { area:'admin', mod };
+  if (area === 'modulo') return { area:'modulo', mod };
+  return { area:'hub', mod:null };
+}
+function consumirFoco(key){
+  if (st.foco && st.foco.mod === key){ const id = st.foco.id; st.foco = null; return id; }
+  return null;
+}
+
+function render(){
+  if (!DB) return;
+  const rota = parseHash();
+  const emAdmin = rota.area === 'admin';
+  $('#t-titulo').textContent = emAdmin ? 'Administração' : (DB.config.congregacao || 'Programação da congregação');
+  $('#t-sub').textContent = emAdmin ? 'Manutenção das programações' : 'Escalas e designações';
+  const troca = $('#troca');
+  troca.textContent = emAdmin ? 'Ver a programação' : 'Área do administrador';
+  troca.href = emAdmin ? '#' : '#admin';
+  if (emAdmin) renderAdmin();
+  else if (rota.area === 'modulo') renderModulo(rota.mod);
+  else renderHub();
+  document.title = emAdmin ? 'Administração · Programação' : 'Programação da congregação';
+}
+
+/* ============================================================ hub e busca global */
+function cartaoHub(h){
+  return `<a class="hub-card" href="#modulo:${h.key}"><span class="faixa" style="background:${h.cor}"></span><h2>${h.titulo}</h2><p>${esc(resumoModulo(h.key))}</p></a>`;
+}
+function resumoModulo(key){
+  if (key === 'ms'){
+    const ws = ordenadas(); if (!ws.length) return 'Nenhuma semana cadastrada';
+    const w = ws.find(ehSemanaAtual) || ws.find(x => x.inicio > hojeIso()) || ws[ws.length-1];
+    return `${rotuloCurto(w)} · ${w.presidente || 'presidente a definir'}`;
+  }
+  if (MODULOS_SIMPLES[key]){
+    const cfg = MODULOS_SIMPLES[key], linhas = DB[cfg.tabela];
+    if (!linhas.length) return 'Nenhuma data cadastrada';
+    const alvo = idAtualPorCampo(linhas, 'data');
+    const x = linhas.find(l => l.data === alvo);
+    return `${dataCurta(alvo)} · ${x[cfg.campos[0].k] || 'a definir'}`;
+  }
+  if (key === 'lp'){
+    const prog = DB.limpezaPeriodica.filter(x => statusPeriodica(x.data) === 'Programado').length;
+    const sem = DB.limpezaSemanal.length ? `próxima em ${dataCurta(idAtualPorCampo(DB.limpezaSemanal,'data'))}` : 'sem datas ainda';
+    return prog ? `${sem} · ${prog} limpeza${prog>1?'s':''} geral${prog>1?'is':''} programada${prog>1?'s':''}` : sem;
+  }
+  if (key === 'rm'){
+    const pend = DB.relatorios.filter(r => r.status === 'Entregue').length;
+    return pend ? `${pend} relatório${pend>1?'s':''} aguardando validação` : 'Nenhum relatório pendente';
+  }
+  return '';
+}
+
+function designacoesMS(f){
+  const out = [];
+  ordenadas().forEach(w => {
+    if (casa(w.presidente, f)) out.push({ w, papel:'Presidente', oque:'Presidência da reunião' });
+    if (casa(w.oracaoInicial, f)) out.push({ w, papel:'Oração', oque:'Oração inicial' });
+    partesOrd(w).forEach(x => {
+      const dir = x.tipo === 'Dirigente/leitor';
+      if (casa(x.nome, f)) out.push({ w, papel: dir ? 'Dirigente' : (x.tipo.startsWith('Estudante') ? 'Estudante' : 'Designado'), oque:x.titulo });
+      if (casa(x.ajudante, f)) out.push({ w, papel: dir ? 'Leitor' : 'Ajudante', oque:x.titulo });
+    });
+    if (casa(w.oracaoFinal, f)) out.push({ w, papel:'Oração', oque:'Oração final' });
+  });
+  return out;
+}
+
+function buscaGlobal(filtro){
+  const f = filtro.trim(); if (f.length < 2) return [];
+  const out = [];
+  designacoesMS(f).forEach(d => out.push({ mod:'ms', data:d.w.inicio, papel:d.papel, oque:d.oque, rot:rotuloCurto(d.w) }));
+  DB.fimDeSemana.forEach(x => {
+    if (casa(x.presidente, f)) out.push({ mod:'fs', data:x.data, papel:'Presidente', oque:'Reunião de fim de semana', rot:dataCurta(x.data) });
+    if (casa(x.leitor, f)) out.push({ mod:'fs', data:x.data, papel:'Leitor', oque:'Leitura de A Sentinela', rot:dataCurta(x.data) });
+  });
+  DB.multimidia.forEach(x => {
+    if (casa(x.mesa, f)) out.push({ mod:'av', data:x.data, papel:'Mesa', oque:'Multimídia', rot:dataCurta(x.data) });
+    if (casa(x.volante1, f) || casa(x.volante2, f)) out.push({ mod:'av', data:x.data, papel:'Volante', oque:'Microfone volante', rot:dataCurta(x.data) });
+  });
+  DB.indicadores.forEach(x => {
+    if (casa(x.indicador1, f) || casa(x.indicador2, f)) out.push({ mod:'in', data:x.data, papel:'Indicador', oque:'Indicador da reunião', rot:dataCurta(x.data) });
+  });
+  DB.limpezaSemanal.forEach(x => {
+    if (casa(x.grupo, f)) out.push({ mod:'lp', data:x.data, papel:'Limpeza', oque:'Limpeza semanal do salão', rot:dataCurta(x.data) });
+  });
+  DB.relatorios.forEach(x => {
+    if (casa(x.nome, f)) out.push({ mod:'rm', data:x.mesAno+'-01', papel:'Relatório', oque:`Relatório de ${mesAnoLegivel(x.mesAno)}`, rot:`${mesAnoLegivel(x.mesAno)} · ${x.status}` });
+  });
+  out.sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  return out;
+}
+
+function renderHub(){
+  $('#app').innerHTML = `
+    <div class="busca">
+      <label for="busca-hub">Minhas designações em todas as áreas</label>
+      <input id="busca-hub" type="search" list="pessoas-hub" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtroHub)}">
+      ${st.filtroHub ? '<button class="limpar" data-acao="limpar-hub" aria-label="Limpar busca">×</button>' : ''}
+      <datalist id="pessoas-hub">${todasPessoas().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    </div>
+    <div id="resultado-hub"></div>
+    <nav class="hub-grade" aria-label="Áreas">${HUB_DEFS.map(cartaoHub).join('')}</nav>`;
+  renderResultadoHub();
+}
+function renderResultadoHub(){
+  const alvo = $('#resultado-hub'); if (!alvo) return;
+  const f = (st.filtroHub||'').trim();
+  if (f.length < 2){ alvo.innerHTML = ''; return; }
+  const lista = buscaGlobal(f);
+  alvo.innerHTML = `<section class="minhas" aria-live="polite"><h2>${lista.length ? `${lista.length} designaç${lista.length>1?'ões':'ão'} para “${esc(f)}”` : 'Nenhuma designação'}</h2>` +
+    (lista.length
+      ? `<ul>${lista.map(d => `<li><a href="#modulo:${d.mod}" data-acao="foco" data-mod="${d.mod}" data-id="${esc(d.data)}"><span class="quando">${esc(d.rot)}</span><span class="oque">${esc(d.oque)}<small>${esc(d.papel)} · ${esc(NOMES_MOD[d.mod])}</small></span></a></li>`).join('')}</ul>`
+      : `<p>Não há designações com esse nome nas áreas publicadas.</p>`) + '</section>';
+}
+
+/* ============================================================ roteador dos módulos (visão pública) */
+function renderModulo(key){
+  if (key === 'ms') return renderModuloMS();
+  if (MODULOS_SIMPLES[key]) return renderModuloSimplesTela(key);
+  if (key === 'lp') return renderModuloLimpeza();
+  if (key === 'rm') return renderModuloRelatorios();
+  location.hash = ''; render();
+}
+
+function tabelaSimplesUsuarioHTML(tabela, campos, focoId, comDiaSemana){
+  const linhas = [...DB[tabela]].sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  if (!linhas.length) return '<p>Nada cadastrado ainda.</p>';
+  const alvo = focoId || idAtualPorCampo(linhas, 'data');
+  const fmtData = iso => comDiaSemana ? `${diaSemana(iso)} · ${dataCurta(iso)}` : dataCurta(iso);
+  return `<div class="rolagem"><table><thead><tr><th>Data</th>${campos.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>` +
+    linhas.map(x => `<tr${x.data===alvo?' class="atual"':''}><td>${fmtData(x.data)}</td>${campos.map(c => `<td>${x[c.k] ? esc(x[c.k]) : '<span class="vazio">a definir</span>'}</td>`).join('')}</tr>`).join('') +
+    '</tbody></table></div>';
+}
+function renderModuloSimplesTela(key){
+  const cfg = MODULOS_SIMPLES[key];
+  const focoId = consumirFoco(key);
+  $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
+    <section class="semana"><header class="sem-cab"><h2>${cfg.titulo}</h2></header>${tabelaSimplesUsuarioHTML(cfg.tabela, cfg.campos, focoId, cfg.comDiaSemana)}</section>`;
+}
+
+function renderModuloLimpeza(){
+  const focoId = consumirFoco('lp');
+  const sem = tabelaSimplesUsuarioHTML('limpezaSemanal', [{k:'grupo',label:'Grupo responsável'}], focoId, true);
+  const per = [...DB.limpezaPeriodica].sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const perHTML = per.length
+    ? `<div class="rolagem"><table><thead><tr><th>Data</th><th>Observações</th><th>Status</th></tr></thead><tbody>${
+        per.map(x => `<tr><td>${x.data?`${diaSemana(x.data)} · ${dataCurta(x.data)}`:'—'}</td><td>${x.observacoes?esc(x.observacoes):'<span class="vazio">a definir</span>'}</td><td><span class="pill ${statusPeriodica(x.data)==='Concluído'?'pill-validado':'pill-entregue'}">${statusPeriodica(x.data)}</span></td></tr>`).join('')
+      }</tbody></table></div>`
+    : '<p>Nenhuma limpeza periódica cadastrada ainda. Toda a congregação é convidada quando houver.</p>';
+  $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
+    <section class="semana"><header class="sem-cab"><h2>Limpeza semanal</h2><p>Sempre logo após a reunião</p></header>${sem}</section>
+    <section class="painel" style="margin-top:16px"><h2>Limpeza periódica</h2><p style="color:var(--muted);margin-top:-6px">Faxina geral — toda a congregação é convidada.</p>${perHTML}</section>`;
+}
+
+function renderModuloRelatorios(){
+  const mesAtual = mesAtualISO();
+  $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
+    <section class="painel">
+      <h2>Enviar meu relatório</h2>
+      <div class="grade">
+        <div class="campo"><label for="rl-mes">Mês</label><input id="rl-mes" type="month" min="${mesAtual}" max="${mesAtual}" value="${mesAtual}">
+          <div class="dica">Só é possível enviar o relatório do mês atual. Meses anteriores ficam disponíveis só para consulta, logo abaixo.</div></div>
+        <div class="campo"><label for="rl-nome">Seu nome</label><select id="rl-nome">${opcoesPessoasComRotulo('— selecione —','')}</select></div>
+      </div>
+      <div class="campo" style="margin-top:10px"><label>Este mês você foi</label>
+        <div class="radios">
+          <label><input type="radio" name="rl-tipo" value="Publicador" checked> Publicador</label>
+          <label><input type="radio" name="rl-tipo" value="Pioneiro Auxiliar"> Pioneiro auxiliar</label>
+          <label><input type="radio" name="rl-tipo" value="Pioneiro Regular"> Pioneiro regular</label>
+        </div>
+      </div>
+      <div class="grade" style="margin-top:10px">
+        <div class="campo" id="campo-horas" style="display:none"><label for="rl-horas">Horas de campo</label><input id="rl-horas" type="number" min="0" inputmode="numeric"></div>
+        <div class="campo"><label for="rl-estudos">Estudos bíblicos (opcional)</label><input id="rl-estudos" type="number" min="0" inputmode="numeric"></div>
+      </div>
+      <button class="btn pri" style="margin-top:14px" data-acao="enviar-relatorio">Enviar relatório</button>
+    </section>
+    <section class="painel" style="margin-top:16px" id="meus-relatorios"><h2>Seus relatórios enviados</h2><p style="color:var(--muted)">Selecione seu nome acima para ver o histórico.</p></section>`;
+}
+function atualizarCampoHoras(){
+  const t = document.querySelector('input[name="rl-tipo"]:checked');
+  const campo = $('#campo-horas'); if (campo) campo.style.display = (t && t.value !== 'Publicador') ? '' : 'none';
+}
+function atualizarMeusRelatorios(){
+  const alvo = $('#meus-relatorios'); if (!alvo) return;
+  const nome = ($('#rl-nome')||{}).value || '';
+  if (!nome){ alvo.innerHTML = '<h2>Seus relatórios enviados</h2><p style="color:var(--muted)">Selecione seu nome acima para ver o histórico.</p>'; return; }
+  const meus = DB.relatorios.filter(r => casa(r.nome, nome)).sort((a,b) => b.mesAno.localeCompare(a.mesAno));
+  alvo.innerHTML = '<h2>Seus relatórios enviados</h2>' + (meus.length
+    ? `<div class="rolagem"><table><thead><tr><th>Mês</th><th>Tipo</th><th>Horas</th><th>Estudos</th><th>Status</th></tr></thead><tbody>${
+        meus.map(r => `<tr><td>${esc(mesAnoLegivel(r.mesAno))}</td><td>${esc(r.tipo)}</td><td>${r.horaCampo||'—'}</td><td>${r.estudos||'—'}</td><td><span class="pill ${r.status==='Validado'?'pill-validado':'pill-entregue'}">${esc(r.status)}</span></td></tr>`).join('')
+      }</tbody></table></div>`
+    : '<p style="color:var(--muted)">Nenhum relatório enviado ainda com esse nome.</p>');
+}
+
+/* ============================================================ Reunião de meio de semana — visão pública */
+function renderModuloMS(){
+  const focoId = consumirFoco('ms'); if (focoId) st.semana = focoId;
+  $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
+    <div class="busca">
+      <label for="busca">Suas designações nesta área</label>
+      <input id="busca" type="search" list="pessoas-ms" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtro)}">
+      ${st.filtro ? '<button class="limpar" data-acao="limpar" aria-label="Limpar busca">×</button>' : ''}
+      <datalist id="pessoas-ms">${todasPessoas().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    </div>
+    <div id="conteudo-ms"></div>`;
+  renderConteudoMS();
+}
+function renderConteudoMS(){
+  const alvo = $('#conteudo-ms'); if (!alvo) return;
+  const ws = ordenadas();
+  if (!ws.length){ alvo.innerHTML = '<div class="painel"><p>Nenhuma semana cadastrada ainda.</p></div>'; return; }
+  if (!st.semana || !ws.some(w => w.id === st.semana)) st.semana = semanaPadrao(ws);
+  const w = ws.find(x => x.id === st.semana);
+  const f = st.filtro.trim().length >= 2 ? st.filtro.trim() : '';
+  let html = '';
+  if (f){
+    const lista = designacoesMS(f);
+    html += `<section class="minhas" aria-live="polite"><h2>${lista.length ? `${lista.length} designaç${lista.length>1?'ões':'ão'} para “${esc(f)}”` : 'Nenhuma designação'}</h2>`;
+    html += lista.length
+      ? `<ul>${lista.map(d => `<li><button data-acao="semana" data-id="${d.w.id}"><span class="quando">${rotuloCurto(d.w)}</span><span class="oque">${esc(d.oque)}<small>${d.papel}</small></span></button></li>`).join('')}</ul>`
+      : `<p>Não há partes com esse nome nas semanas publicadas.</p>`;
+    html += '</section>';
+  }
+  html += `<nav class="chips" aria-label="Semanas">${ws.map(x =>
+    `<button class="chip" data-acao="semana" data-id="${x.id}" aria-pressed="${x.id===w.id}">${rotuloCurto(x)}${ehSemanaAtual(x)?'<span class="agora" title="Semana atual"></span>':''}</button>`).join('')}</nav>`;
+  html += cartaoSemanaMS(w, f);
+  alvo.innerHTML = html;
+  const ativo = alvo.querySelector('.chip[aria-pressed="true"]');
+  ativo && ativo.scrollIntoView({ block:'nearest', inline:'center' });
+}
+function cartaoSemanaMS(w, f){
+  const nm = n => !n ? '<span class="vazio">a definir</span>' : (f && casa(n,f) ? `<mark>${esc(n)}</mark>` : esc(n));
+  const tem = (...ns) => f && ns.some(n => casa(n,f));
+  let n = 0;
+  const linhaParte = x => {
+    n++;
+    const nomes = x.ajudante ? `${nm(x.nome)} / ${nm(x.ajudante)}` : nm(x.nome);
+    return `<div class="parte${tem(x.nome,x.ajudante)?' hl':''}">
+      <span class="num">${n}</span>
+      <span class="tit">${esc(x.titulo) || '<span class="vazio">Título a definir</span>'}</span>
+      <span class="min">${x.min ? x.min + ' min' : ''}</span>
+      <span class="quem">${x.tipo ? `<span class="papel">${esc(x.tipo)}</span>` : ''}<span class="nomes">${nomes}</span></span>
+    </div>`;
+  };
+  const bloco = s => {
+    const ps = w.partes.filter(x => x.secao === s);
+    let h = `<section class="bloco b-${s}"><h3>${SECOES[s]}</h3>`;
+    if (s === 'V' && w.canticoMeio) h += `<div class="simples"><span>Cântico de transição ${esc(w.canticoMeio)}</span><span></span></div>`;
+    h += ps.map(linhaParte).join('');
+    if (s === 'V'){
+      h += `<div class="simples"><span>Comentários finais</span><span>3 min</span></div>`;
+      h += `<div class="parte${tem(w.oracaoFinal)?' hl':''}"><span class="num" aria-hidden="true" style="border-style:dotted"></span><span class="tit">Cântico ${esc(w.canticoFinal)||'—'} e oração</span><span class="min"></span><span class="quem"><span class="papel">Oração</span><span class="nomes">${nm(w.oracaoFinal)}</span></span></div>`;
+    }
+    return h + '</section>';
+  };
+  return `<article class="semana">
+    <header class="sem-cab"><div><h2>${rotuloLongo(w)}</h2><p>${esc(w.textoBiblico) || 'Texto bíblico a definir'}</p></div><span class="data-reuniao">${dataDDMMAAAA(w.inicio)}</span></header>
+    <div class="equipe">
+      <div class="${tem(w.presidente)?'hl':''}"><small>Presidente</small><b>${nm(w.presidente)}</b></div>
+      <div class="${tem(w.oracaoInicial)?'hl':''}"><small>Oração inicial</small><b>${nm(w.oracaoInicial)}</b></div>
+    </div>
+    <div class="simples"><span>Cântico ${esc(w.canticoInicial)||'—'} e oração</span><span></span></div>
+    <div class="simples"><span>Comentários iniciais</span><span>1 min</span></div>
+    ${['T','M','V'].map(bloco).join('')}
+  </article>`;
+}
+
+/* ============================================================ administração — roteador */
+function renderAdmin(){
+  if (!st.escopo) return renderAdminLogin();
+  const mod = parseHash().mod;
+  if (st.escopo === 'todos'){
+    if (!mod) return renderAdminHub();
+    if (mod === 'config') return renderAdminConfig();
+    if (mod === 'pessoas') return renderAdminPessoas();
+    return renderAdminModuloTela(mod);
+  }
+  return renderAdminModuloTela(st.escopo);
+}
+function renderAdminLogin(){
+  $('#app').innerHTML = `
+    <section class="painel" style="max-width:380px;margin:30px auto">
+      <h2>Entrar</h2>
+      <div class="campo"><label for="pin">PIN de administrador</label>
+        <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" autofocus>
+        <div class="dica">O PIN mestre abre tudo; o PIN de cada área abre só aquela área.</div></div>
+      <button class="btn pri" style="width:100%;margin-top:14px" data-acao="login">Entrar</button>
+    </section>`;
+  setTimeout(() => $('#pin') && $('#pin').focus(), 50);
+}
+function renderAdminHub(){
+  $('#app').innerHTML = `
+    <div class="aviso"><b>Conectado à planilha do Google.</b> O que você salvar aqui grava direto na planilha da congregação. PIN mestre e PIN de cada área ficam em Configurações gerais. Toda designação nas áreas abaixo é escolhida a partir do cadastro de publicadores.</div>
+    <section class="painel"><div class="linha-acoes"><h2>Áreas</h2><button class="btn" data-acao="sair">Sair</button></div>
+      <nav class="hub-grade">${HUB_DEFS.map(h => `<a class="hub-card" href="#admin:${h.key}"><span class="faixa" style="background:${h.cor}"></span><h2>${h.titulo}</h2><p>Gerenciar</p></a>`).join('')}</nav>
+    </section>
+    <section class="painel" style="margin-top:16px"><div class="linha-acoes" style="margin-bottom:0">
+      <a href="#admin:pessoas" class="btn pri">Cadastro de publicadores</a>
+      <a href="#admin:config" class="btn">Configurações gerais</a>
+    </div></section>`;
+}
+function renderAdminConfig(){
+  $('#app').innerHTML = `<a class="voltar" href="#admin">← Painel</a>
+    <section class="painel"><h2>Configurações gerais</h2>
+      <div class="grade">
+        <div class="campo"><label for="cfg-nome">Nome exibido no topo</label><input id="cfg-nome" value="${esc(DB.config.congregacao)}"></div>
+        <div class="campo"><label for="cfg-pin">PIN mestre (abre tudo)</label><input id="cfg-pin" inputmode="numeric" value="${esc(DB.config.pinMestre)}"></div>
+        ${HUB_DEFS.map(h => `<div class="campo"><label for="cfg-pin-${h.key}">PIN — ${h.titulo}</label><input id="cfg-pin-${h.key}" inputmode="numeric" value="${esc(DB.config.pins[h.key]||'')}"></div>`).join('')}
+      </div>
+      <div class="linha-acoes" style="margin-top:14px">
+        <button class="btn" data-acao="sair">Sair</button>
+        <button class="btn pri" data-acao="salvar-config">Salvar configurações</button>
+      </div>
+    </section>`;
+}
+function renderAdminPessoas(){
+  DB.pessoas.sort((a,b) => a.id - b.id);
+  const linhas = DB.pessoas;
+  const FUNCOES = [
+    { k:'podePresidente', label:'Presidente' },
+    { k:'podeDirigenteEstudo', label:'Dirigente do estudo' },
+    { k:'podeVolante', label:'Volante' },
+    { k:'podeIndicador', label:'Indicador' },
+    { k:'podeMesa', label:'Mesa' },
+    { k:'podeLeitorSentinela', label:'Leitor d\u2019A Sentinela' },
+    { k:'podeLeitorEstudo', label:'Leitor do estudo' }
+  ];
+  const linha = (x,i) => `<tr>
+    <td>${x.id}</td>
+    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="nome" value="${esc(x.nome)}" placeholder="Nome completo"></td>
+    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="grupo" value="${esc(x.grupo||'')}" list="grupos-existentes" placeholder="Ex.: Grupo 1"></td>
+    ${FUNCOES.map(fn => `<td class="centro"><input type="checkbox" data-tab="pessoas" data-i="${i}" data-k="${fn.k}" ${x[fn.k]?'checked':''} aria-label="${esc(x.nome)||'publicador'} — ${fn.label}"></td>`).join('')}
+    <td><button class="btn ico perigo" data-acao="remover-linha" data-tab="pessoas" data-i="${i}" aria-label="Remover ${esc(x.nome)||'publicador'}">✕</button></td></tr>`;
+  $('#app').innerHTML = `<a class="voltar" href="#admin">← Painel</a>
+    <section class="painel">
+      <div class="linha-acoes"><h2>Cadastro de publicadores</h2><button class="btn" data-acao="sair">Sair</button></div>
+      <p style="color:var(--muted);margin-top:-4px">Esse cadastro alimenta as listas de designação nas seis áreas. Marque as funções em que cada um pode ser escalado — sem marcação, o nome não aparece na caixa de escolha daquela função.</p>
+      <div class="tabela-edit"><table><thead><tr><th>ID</th><th>Nome do publicador</th><th>Grupo</th>${FUNCOES.map(fn => `<th>${esc(fn.label)}</th>`).join('')}<th></th></tr></thead>
+      <tbody>${linhas.map(linha).join('') || ''}</tbody></table></div>
+      <datalist id="grupos-existentes">${gruposUnicos().map(g => `<option value="${esc(g)}">`).join('')}</datalist>
+      <div class="linha-acoes" style="margin-top:4px">
+        <button class="btn" data-acao="add-pessoa">Adicionar publicador</button>
+        <button class="btn pri" data-acao="salvar-tabela" data-tab="pessoas">Salvar alterações</button>
+      </div>
+    </section>`;
+}
+function renderAdminModuloTela(key){
+  if (key === 'ms') return renderAdminMS();
+  if (MODULOS_SIMPLES[key]) return renderAdminSimples(key);
+  if (key === 'lp') return renderAdminLimpeza();
+  if (key === 'rm') return renderAdminRelatorios();
+  location.hash = '#admin'; render();
+}
+function linkVoltarAdmin(){ return st.escopo === 'todos' ? '<a class="voltar" href="#admin">← Painel</a>' : ''; }
+
+/* -------- tabela editável genérica (Fim de Semana / Áudio-Vídeo-Volantes / Indicadores / Limpeza semanal) */
+function tabelaSimplesAdminHTML(tabela, campos){
+  DB[tabela].sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const linhas = DB[tabela];
+  const campoHTML = (c,i,x) => {
+    const opts = c.tipo === 'grupo' ? opcoesGrupos(x[c.k]||'') : opcoesPessoas(x[c.k]||'', c.flag);
+    return `<select data-tab="${tabela}" data-i="${i}" data-k="${c.k}">${opts}</select>`;
+  };
+  const linha = (x,i) => `<tr>
+    <td><input type="date" data-tab="${tabela}" data-i="${i}" data-k="data" value="${x.data||''}"></td>
+    ${campos.map(c => `<td>${campoHTML(c,i,x)}</td>`).join('')}
+    <td><button class="btn ico perigo" data-acao="remover-linha" data-tab="${tabela}" data-i="${i}" aria-label="Remover linha">✕</button></td></tr>`;
+  return `<div class="tabela-edit"><table><thead><tr><th>Data</th>${campos.map(c => `<th>${esc(c.label)}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${linhas.map(linha).join('')}</tbody></table></div>
+    <div class="linha-acoes" style="margin-top:4px">
+      <button class="btn" data-acao="add-linha" data-tab="${tabela}">Adicionar linha</button>
+      <button class="btn pri" data-acao="salvar-tabela" data-tab="${tabela}">Salvar alterações</button>
+    </div>`;
+}
+function linhaVaziaTabela(tabela){
+  const prox = () => { const arr = DB[tabela]; if (!arr.length) return hojeIso(); const ult = [...arr].map(x=>x.data).sort().pop(); return somaDias(ult,7); };
+  switch(tabela){
+    case 'fimDeSemana': return { data:prox(), presidente:'', leitor:'' };
+    case 'multimidia': return { data:prox(), mesa:'', volante1:'', volante2:'' };
+    case 'indicadores': return { data:prox(), indicador1:'', indicador2:'' };
+    case 'limpezaSemanal': return { data:prox(), grupo:'' };
+  }
+}
+function renderAdminSimples(key){
+  const cfg = MODULOS_SIMPLES[key];
+  $('#app').innerHTML = linkVoltarAdmin() + avisoSemPessoas() +
+    `<section class="painel"><div class="linha-acoes"><h2>${cfg.titulo}</h2><button class="btn" data-acao="sair">Sair</button></div>${tabelaSimplesAdminHTML(cfg.tabela, cfg.campos)}</section>`;
+}
+
+/* -------- Limpeza (semanal + periódica) */
+function tabelaPeriodicaAdminHTML(){
+  const linhas = DB.limpezaPeriodica;
+  const linha = (x,i) => `<tr>
+    <td><input type="date" data-tabp="${i}" data-k="data" value="${x.data||''}"></td>
+    <td><input type="text" data-tabp="${i}" data-k="observacoes" value="${esc(x.observacoes||'')}" placeholder="Ex.: janelas, cortinas e carpetes"></td>
+    <td><span class="pill ${statusPeriodica(x.data)==='Concluído'?'pill-validado':'pill-entregue'}">${statusPeriodica(x.data)}</span></td>
+    <td><button class="btn ico perigo" data-acao="remover-periodica" data-i="${i}" aria-label="Remover data">✕</button></td></tr>`;
+  return `<p style="color:var(--muted);margin-top:-4px">Faxina geral, convite aberto à congregação — sem responsável fixo. O status é calculado sozinho a partir da data.</p>
+    <div class="tabela-edit"><table><thead><tr><th>Data</th><th>Observações</th><th>Status</th><th></th></tr></thead>
+    <tbody>${linhas.map(linha).join('')}</tbody></table></div>
+    <div class="linha-acoes" style="margin-top:4px">
+      <button class="btn" data-acao="add-periodica">Adicionar data</button>
+      <button class="btn pri" data-acao="salvar-periodica">Salvar alterações</button>
+    </div>`;
+}
+function renderAdminLimpeza(){
+  $('#app').innerHTML = linkVoltarAdmin() + avisoSemPessoas() +
+    `<section class="painel"><div class="linha-acoes"><h2>Limpeza semanal</h2><button class="btn" data-acao="sair">Sair</button></div>${tabelaSimplesAdminHTML('limpezaSemanal',[{k:'grupo',label:'Grupo responsável',tipo:'grupo'}])}</section>
+     <section class="painel" style="margin-top:16px"><h2>Limpeza periódica</h2>${tabelaPeriodicaAdminHTML()}</section>`;
+}
+
+/* -------- Relatórios mensais (admin) */
+function renderAdminRelatorios(){
+  const meses = [...new Set(DB.relatorios.map(r => r.mesAno))].sort().reverse();
+  const mesAtual = mesAtualISO();
+  if (!st.mesAdmin || (meses.length && !meses.includes(st.mesAdmin))) st.mesAdmin = meses[0] || mesAtual;
+  if (!meses.includes(st.mesAdmin)) meses.unshift(st.mesAdmin);
+  const linhas = DB.relatorios.filter(r => r.mesAno === st.mesAdmin);
+  const linha = r => `<tr>
+    <td>${esc(r.nome)}</td>
+    <td><select data-rid="${esc(r.id)}" data-k="tipo">
+      <option ${r.tipo==='Publicador'?'selected':''}>Publicador</option>
+      <option ${r.tipo==='Pioneiro Auxiliar'?'selected':''}>Pioneiro Auxiliar</option>
+      <option ${r.tipo==='Pioneiro Regular'?'selected':''}>Pioneiro Regular</option>
+    </select></td>
+    <td><input type="number" min="0" data-rid="${esc(r.id)}" data-k="horaCampo" value="${r.horaCampo||''}" ${r.tipo==='Publicador'?'disabled':''}></td>
+    <td><input type="number" min="0" data-rid="${esc(r.id)}" data-k="estudos" value="${r.estudos||''}"></td>
+    <td><span class="pill ${r.status==='Validado'?'pill-validado':'pill-entregue'}">${esc(r.status)}</span></td>
+    <td><button class="btn" data-acao="alternar-status" data-rid="${esc(r.id)}">${r.status==='Validado'?'Reabrir':'Validar'}</button></td></tr>`;
+  const corpo = linhas.length
+    ? `<div class="tabela-edit"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Horas</th><th>Estudos</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(linha).join('')}</tbody></table></div>
+       <div class="linha-acoes" style="margin-top:4px"><button class="btn pri" data-acao="salvar-relatorios">Salvar alterações</button></div>`
+    : '<p style="margin-top:12px">Nenhum relatório recebido neste mês ainda.</p>';
+  $('#app').innerHTML = linkVoltarAdmin() + `<section class="painel">
+    <div class="linha-acoes"><h2>Relatórios mensais</h2><button class="btn" data-acao="sair">Sair</button></div>
+    <div class="campo" style="max-width:240px"><label for="mes-adm">Mês</label>
+      <select id="mes-adm">${meses.map(m => `<option value="${m}" ${m===st.mesAdmin?'selected':''}>${esc(mesAnoLegivel(m))}</option>`).join('')}</select></div>
+    ${corpo}</section>`;
+}
+
+/* -------- Reunião de meio de semana (admin) — lista + editor */
+function renderAdminMS(){
+  if (st.draft) return renderEditorMS();
+  const ws = ordenadas();
+  $('#app').innerHTML = linkVoltarAdmin() + avisoSemPessoas() + `<section class="painel">
+    <div class="linha-acoes"><h2>Semanas</h2><button class="btn pri" data-acao="nova">Nova semana</button></div>
+    ${ws.length ? `<ul class="lista-sem">${ws.map(w => `
+      <li><div class="txt"><b>${rotuloLongo(w)}</b><small>${esc(w.textoBiblico)||'Texto a definir'} · presidente ${esc(w.presidente)||'a definir'}</small></div>
+      <button class="btn" data-acao="editar" data-id="${w.id}">Editar</button>
+      <button class="btn ico perigo" data-acao="excluir" data-id="${w.id}" aria-label="Excluir semana de ${rotuloLongo(w)}">✕</button></li>`).join('')}</ul>`
+      : '<p>Nenhuma semana ainda. Use “Nova semana” para começar.</p>'}
+    </section>
+    <button class="btn" data-acao="sair" style="margin-top:12px">Sair</button>`;
+}
+function renderEditorMS(){
+  const d = st.draft;
+  const inp = (f, rot, extra='') => `<div class="campo"><label for="f-${f}">${rot}</label><input id="f-${f}" data-f="${f}" value="${esc(d[f])}" ${extra}></div>`;
+  const sel = (f, rot, flag) => `<div class="campo"><label for="f-${f}">${rot}</label><select id="f-${f}" data-f="${f}">${opcoesPessoas(d[f], flag)}</select></div>`;
+  const edBloco = s => {
+    const idx = d.partes.map((x,i) => x.secao === s ? i : -1).filter(i => i >= 0);
+    const cor = s === 'T' ? 'var(--tes)' : s === 'M' ? 'var(--min)' : 'var(--vid)';
+    return `<div class="ed-bloco"><h3 style="background:${cor}">${SECOES[s]}</h3>
+      ${idx.map((i,k) => { const x = d.partes[i]; const temAj = x.tipo.includes('/');
+        const rotAj = x.tipo === 'Dirigente/leitor' ? 'Leitor' : 'Ajudante';
+        const rotNome = x.tipo === 'Dirigente/leitor' ? 'Dirigente' : x.tipo.startsWith('Estudante') ? 'Estudante' : 'Designado';
+        return `<div class="ed-parte">
+          <div class="ed-l1">
+            <div class="campo"><label for="p${i}t">Título da parte</label><input id="p${i}t" data-i="${i}" data-k="titulo" value="${esc(x.titulo)}"></div>
+            <div class="campo"><label for="p${i}m">Minutos</label><input id="p${i}m" data-i="${i}" data-k="min" type="number" min="0" inputmode="numeric" value="${esc(x.min)}"></div>
+          </div>
+          <div class="ed-l2">
+            <div class="campo"><label for="p${i}y">Tipo</label><select id="p${i}y" data-i="${i}" data-k="tipo">${TIPOS.map(t => `<option value="${t}" ${t===x.tipo?'selected':''}>${t||'Designação simples'}</option>`).join('')}</select></div>
+            <div class="campo"><label for="p${i}n">${rotNome}</label><select id="p${i}n" data-i="${i}" data-k="nome">${opcoesPessoas(x.nome, x.tipo==='Dirigente/leitor'?'podeDirigenteEstudo':null)}</select></div>
+            <div class="campo"><label for="p${i}a">${rotAj}</label><select id="p${i}a" data-i="${i}" data-k="ajudante" ${temAj?'':'disabled'}>${opcoesPessoas(x.ajudante, x.tipo==='Dirigente/leitor'?'podeLeitorEstudo':null)}</select></div>
+          </div>
+          <div class="ed-l3">
+            <button class="btn ico" data-acao="sobe" data-i="${i}" aria-label="Subir parte" ${k===0?'disabled':''}>↑</button>
+            <button class="btn ico" data-acao="desce" data-i="${i}" aria-label="Descer parte" ${k===idx.length-1?'disabled':''}>↓</button>
+            <button class="btn ico perigo" data-acao="remover" data-i="${i}" aria-label="Remover parte">✕</button>
+          </div>
+        </div>`; }).join('')}
+      <button class="btn" data-acao="adicionar" data-s="${s}">Adicionar parte</button>
+    </div>`;
+  };
+  $('#app').innerHTML = avisoSemPessoas() + `<section class="painel">
+      <h2>${st.editId ? 'Editar semana' : 'Nova semana'}</h2>
+      <div class="grade">
+        <div class="campo"><label for="f-inicio">Segunda-feira da semana</label><input id="f-inicio" data-f="inicio" type="date" value="${esc(d.inicio)}"><div class="dica" id="dica-fim">${d.inicio ? 'Vai até ' + rotuloLongo({inicio:d.inicio, fim:somaDias(d.inicio,6)}).split(' a ')[1] : ''}</div></div>
+        ${inp('textoBiblico','Texto bíblico da semana','placeholder="Ex.: Jeremias 40–41"')}
+        ${sel('presidente','Presidente','podePresidente')}
+        ${sel('oracaoInicial','Oração inicial')}
+        ${inp('canticoInicial','Cântico inicial','inputmode="numeric"')}
+        ${inp('canticoMeio','Cântico de transição','inputmode="numeric"')}
+        ${inp('canticoFinal','Cântico final','inputmode="numeric"')}
+        ${sel('oracaoFinal','Oração final')}
+      </div>
+      ${['T','M','V'].map(edBloco).join('')}
+      <div class="rodape-ed">
+        <button class="btn" data-acao="cancelar">Cancelar</button>
+        <button class="btn pri" data-acao="salvar">Salvar semana</button>
+      </div>
+    </section>`;
+}
+function mover(i, dir){
+  const P = st.draft.partes, s = P[i].secao;
+  let j = i + dir;
+  while (j >= 0 && j < P.length && P[j].secao !== s) j += dir;
+  if (j < 0 || j >= P.length) return;
+  [P[i], P[j]] = [P[j], P[i]];
+}
+function novaSemana(){
+  const ws = ordenadas(), base = ws[ws.length-1];
+  let inicio;
+  if (base) inicio = somaDias(base.inicio, 7);
+  else { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); inicio = paraIso(d); }
+  const partes = (base ? base.partes : MODELO_PARTES_MS).map(x => ({ ...x, nome:'', ajudante:'', titulo: /joias|leitura|estudo b|iniciando|cultivando|explicando/i.test(x.titulo) ? x.titulo : '' }));
+  st.draft = { id:null, inicio, fim:somaDias(inicio,6), textoBiblico:'', presidente:'', oracaoInicial:'', oracaoFinal:'', canticoInicial:'', canticoMeio:'', canticoFinal:'', partes };
+  st.editId = null;
+  render(); window.scrollTo(0,0);
+}
+async function salvarSemanaMS(b){
+  const d = st.draft;
+  if (!d.inicio){ toast('Escolha a data de início da semana'); return; }
+  if (DB.semanasMS.some(w => w.id === d.inicio && w.id !== st.editId)){ toast('Já existe uma semana começando nessa data'); return; }
+  const w = { ...d, id:d.inicio, fim:somaDias(d.inicio,6),
+    partes: d.partes.map(x => ({ ...x, titulo:x.titulo.trim(), nome:x.nome.trim(), ajudante:x.tipo.includes('/') ? x.ajudante.trim() : '', min:Number(x.min)||0 })) };
+  DB.semanasMS = DB.semanasMS.filter(x => x.id !== st.editId && x.id !== w.id);
+  DB.semanasMS.push(w);
+  if (b) b.disabled = true;
+  try {
+    await Dados.salvar();
+    st.draft = null; st.editId = null; st.semana = w.id;
+    render(); window.scrollTo(0,0);
+    toast('Semana salva');
+  } catch (err) {
+    toast('Não foi possível salvar: ' + err.message);
+  } finally {
+    if (b) b.disabled = false;
+  }
+}
+
+/* ============================================================ eventos */
+// Salva o estado atual de DB na planilha, com feedback de sucesso/erro e
+// o botão desabilitado durante a chamada, evitando duplo clique.
+function salvarComFeedback(b, msgOk, reRender){
+  if (b) b.disabled = true;
+  Dados.salvar().then(() => {
+    if (reRender) render();
+    toast(msgOk);
+  }).catch(err => {
+    toast('Não foi possível salvar: ' + err.message);
+  }).finally(() => { if (b) b.disabled = false; });
+}
+
+function manipularCampoTabela(t){
+  const val = t.type === 'checkbox' ? t.checked : t.value;
+  if (t.dataset.tab !== undefined){ DB[t.dataset.tab][Number(t.dataset.i)][t.dataset.k] = val; return true; }
+  if (t.dataset.tabp !== undefined){ DB.limpezaPeriodica[Number(t.dataset.tabp)][t.dataset.k] = val; return true; }
+  if (t.dataset.rid !== undefined){
+    const r = DB.relatorios.find(x => x.id === t.dataset.rid); if (!r) return true;
+    if (t.dataset.k === 'tipo'){ r.tipo = val; if (val === 'Publicador') r.horaCampo = ''; render(); return true; }
+    r[t.dataset.k] = val; return true;
+  }
+  return false;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-acao]'); if (!b) return;
+  const a = b.dataset.acao, id = b.dataset.id, i = Number(b.dataset.i);
+  switch (a){
+    case 'foco': st.foco = { mod:b.dataset.mod, id:b.dataset.id }; if (b.dataset.mod === 'ms') st.semana = b.dataset.id; break;
+    case 'semana': st.semana = id; renderConteudoMS(); if (b.closest('.minhas')) document.querySelector('.semana')?.scrollIntoView({ behavior:'smooth', block:'start' }); break;
+    case 'limpar': st.filtro = ''; renderModuloMS(); break;
+    case 'limpar-hub': st.filtroHub = ''; renderHub(); break;
+    case 'login': {
+      const pin = $('#pin').value.trim();
+      const r = checarPin(pin);
+      if (r){ st.escopo = r; st.pin = pin; sessaoEscopo(r); sessaoPin(pin); location.hash = r === 'todos' ? '#admin' : '#admin:' + r; render(); }
+      else { toast('PIN incorreto'); $('#pin').select(); }
+      break; }
+    case 'sair': st.escopo = ''; st.pin = ''; sessaoEscopo(''); sessaoPin(''); location.hash = ''; break;
+    case 'nova': novaSemana(); break;
+    case 'editar': st.editId = id; st.draft = JSON.parse(JSON.stringify(DB.semanasMS.find(w => w.id === id))); render(); window.scrollTo(0,0); break;
+    case 'excluir': { const w = DB.semanasMS.find(x => x.id === id);
+      if (w && confirm(`Excluir a semana de ${rotuloLongo(w)}?`)){ DB.semanasMS = DB.semanasMS.filter(x => x.id !== id); salvarComFeedback(b, 'Semana excluída', true); }
+      break; }
+    case 'adicionar': { const P = st.draft.partes, s = b.dataset.s;
+      const ult = P.map(x => x.secao).lastIndexOf(s);
+      const pos = ult >= 0 ? ult + 1 : (s === 'T' ? 0 : s === 'M' ? P.filter(x => x.secao === 'T').length : P.length);
+      P.splice(pos, 0, p(s, '', s === 'M' ? 3 : 10, s === 'M' ? 'Estudante/ajudante' : '', ''));
+      render(); document.getElementById(`p${pos}t`)?.focus(); break; }
+    case 'remover': st.draft.partes.splice(i,1); render(); break;
+    case 'sobe': mover(i,-1); render(); break;
+    case 'desce': mover(i,1); render(); break;
+    case 'cancelar': st.draft = null; st.editId = null; render(); break;
+    case 'salvar': salvarSemanaMS(b); break;
+    case 'salvar-config': { const pin = $('#cfg-pin').value.trim();
+      if (pin.length < 4){ toast('Use um PIN mestre com pelo menos 4 dígitos'); break; }
+      DB.config.congregacao = $('#cfg-nome').value.trim(); DB.config.pinMestre = pin;
+      HUB_DEFS.forEach(h => { const el = $('#cfg-pin-'+h.key); if (el) DB.config.pins[h.key] = el.value.trim(); });
+      salvarComFeedback(b, 'Configurações salvas', true); break; }
+    case 'add-pessoa': { const prox = DB.pessoas.length ? Math.max(...DB.pessoas.map(x => x.id)) + 1 : 1; DB.pessoas.push({ id:prox, nome:'', grupo:'', podePresidente:false, podeDirigenteEstudo:false, podeVolante:false, podeIndicador:false, podeMesa:false, podeLeitorSentinela:false, podeLeitorEstudo:false }); render(); break; }
+    case 'add-linha': DB[b.dataset.tab].push(linhaVaziaTabela(b.dataset.tab)); render(); break;
+    case 'remover-linha': DB[b.dataset.tab].splice(i,1); render(); break;
+    case 'salvar-tabela': salvarComFeedback(b, 'Alterações salvas', false); break;
+    case 'add-periodica': DB.limpezaPeriodica.push({ data:'', observacoes:'' }); render(); break;
+    case 'remover-periodica': DB.limpezaPeriodica.splice(i,1); render(); break;
+    case 'salvar-periodica': salvarComFeedback(b, 'Alterações salvas', false); break;
+    case 'alternar-status': { const r = DB.relatorios.find(x => x.id === b.dataset.rid); if (r){ r.status = r.status === 'Validado' ? 'Entregue' : 'Validado'; salvarComFeedback(b, 'Status atualizado', true); } break; }
+    case 'salvar-relatorios': salvarComFeedback(b, 'Alterações salvas', false); break;
+    case 'enviar-relatorio': {
+      const mesAno = $('#rl-mes').value, nome = $('#rl-nome').value;
+      const mesAtual = mesAtualISO();
+      if (!nome){ toast('Selecione o seu nome'); break; }
+      if (mesAno !== mesAtual){ toast('Só é possível enviar o relatório do mês atual.'); break; }
+      const tipoEl = document.querySelector('input[name="rl-tipo"]:checked'); const tipo = tipoEl ? tipoEl.value : 'Publicador';
+      const horaCampo = tipo !== 'Publicador' ? (Number($('#rl-horas').value)||0) : '';
+      const estudos = $('#rl-estudos').value ? Number($('#rl-estudos').value) : '';
+      const registro = { mesAno, nome, tipo, horaCampo, estudos };
+      b.disabled = true;
+      Dados.enviarRelatorio(registro).then(() => {
+        const idr = mesAno + '|' + norm(nome);
+        const existente = DB.relatorios.find(r => r.id === idr);
+        if (existente) Object.assign(existente, { nome, tipo, horaCampo, estudos, status:'Entregue' });
+        else DB.relatorios.push({ id:idr, mesAno, nome, tipo, horaCampo, estudos, status:'Entregue' });
+        toast(existente ? 'Relatório atualizado' : 'Relatório enviado');
+        atualizarMeusRelatorios();
+      }).catch(err => {
+        toast('Não foi possível enviar: ' + err.message);
+      }).finally(() => { b.disabled = false; });
+      break; }
+  }
+});
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (manipularCampoTabela(t)) return;
+  if (t.id === 'busca'){
+    const tinha = !!st.filtro; st.filtro = t.value;
+    if (tinha !== !!st.filtro){ const pos = t.selectionStart; renderModuloMS(); const nb = $('#busca'); nb.focus(); nb.setSelectionRange(pos,pos); }
+    else renderConteudoMS();
+    return;
+  }
+  if (t.id === 'busca-hub'){ st.filtroHub = t.value; renderResultadoHub(); return; }
+  if (t.id === 'rl-nome'){ atualizarMeusRelatorios(); return; }
+  if (!st.draft) return;
+  if (t.dataset.f){
+    st.draft[t.dataset.f] = t.value;
+    if (t.dataset.f === 'inicio' && t.value){ const dica = $('#dica-fim'); if (dica) dica.textContent = 'Vai até ' + rotuloLongo({inicio:t.value, fim:somaDias(t.value,6)}).split(' a ')[1]; }
+  } else if (t.dataset.k && t.dataset.k !== 'tipo' && t.dataset.i !== undefined){
+    st.draft.partes[Number(t.dataset.i)][t.dataset.k] = t.value;
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (manipularCampoTabela(t)) return;
+  if (t.name === 'rl-tipo'){ atualizarCampoHoras(); return; }
+  if (t.id === 'rl-nome'){ atualizarMeusRelatorios(); return; }
+  if (t.id === 'mes-adm'){ st.mesAdmin = t.value; renderAdminRelatorios(); return; }
+  if (st.draft && t.tagName === 'SELECT' && t.dataset.k === 'tipo' && t.dataset.i !== undefined){
+    st.draft.partes[Number(t.dataset.i)].tipo = t.value; render();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'pin') document.querySelector('[data-acao="login"]').click();
+});
+
+window.addEventListener('hashchange', () => { st.draft = null; st.editId = null; render(); window.scrollTo(0,0); });
+
+/* ============================================================ carregamento inicial */
+async function iniciar(){
+  $('#app').innerHTML = '<div class="painel"><p>Carregando dados da planilha…</p></div>';
+  try {
+    DB = await Dados.carregar();
+    render();
+  } catch (err) {
+    $('#app').innerHTML = `<div class="painel"><h2>Não foi possível carregar os dados</h2>
+      <p style="color:var(--muted)">${esc(err.message)}</p>
+      <button class="btn pri" data-acao="tentar-de-novo">Tentar de novo</button></div>`;
+  }
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-acao="tentar-de-novo"]')) iniciar();
+});
+iniciar();
+
+// Registro do service worker para instalação e modo offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
+<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:40">
+  <span style="flex:1;font-size:15px">Salvar na tela inicial para acesso rápido</span>
+  <button id="btn-instalar" class="btn pri" style="flex:none">Instalar</button>
+  <button id="btn-fechar-pwa" class="btn" style="flex:none">×</button>
+</div>
+</body>
+</html>
