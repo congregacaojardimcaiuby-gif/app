@@ -1145,7 +1145,7 @@ window.addEventListener('hashchange', () => { st.draft = null; st.editId = null;
 
 /* ============================================================ carregamento inicial */
 async function iniciar(){
-  $('#app').innerHTML = '<div class="painel"><p>Carregando dados da planilha…</p></div>';
+  $('#app').innerHTML = '<div class="painel"><p>Carregando dados…</p></div>';
   try {
     DB = await Dados.carregar();
     render();
