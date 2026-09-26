@@ -187,6 +187,7 @@ footer a{color:var(--muted)}
       <strong id="t-titulo">Programação da congregação</strong>
       <span id="t-sub">Escalas e designações</span>
     </div>
+    <div id="topo-usuario" style="display:flex;align-items:center;gap:8px;flex:none"></div>
   </div>
 </header>
 
@@ -375,6 +376,18 @@ function sessaoPin(v){
   } catch(e){}
   return v;
 }
+function sessaoUsuario(v){
+  try {
+    if (v === undefined) return sessionStorage.getItem('reuniao-cong-usuario') || '';
+    v ? sessionStorage.setItem('reuniao-cong-usuario', v) : sessionStorage.removeItem('reuniao-cong-usuario');
+  } catch(e){}
+  return v;
+}
+function checarPinUsuario(nome, pin){
+  if (!nome || !pin) return false;
+  const p = DB.pessoas.find(x => x.nome === nome);
+  return p && p.pin && String(p.pin).trim() === String(pin).trim();
+}
 function checarPin(pin){
   pin = (pin||'').trim(); if (!pin) return '';
   if (pin === DB.config.pinMestre) return 'todos';
@@ -384,7 +397,7 @@ function checarPin(pin){
 
 /* ============================================================ estado e rotas */
 let DB = null;
-const st = { semana:null, filtro:'', filtroHub:'', escopo:sessaoEscopo(), pin:sessaoPin(), draft:null, editId:null, foco:null, mesAdmin:null };
+const st = { semana:null, filtro:'', filtroHub:'', escopo:sessaoEscopo(), pin:sessaoPin(), usuario:sessaoUsuario(), draft:null, editId:null, foco:null, mesAdmin:null };
 
 function parseHash(){
   const h = (location.hash || '').slice(1);
@@ -401,6 +414,17 @@ function consumirFoco(key){
   return null;
 }
 
+function renderTopoUsuario(){
+  const el = $('#topo-usuario');
+  if (!el) return;
+  if (st.usuario){
+    el.innerHTML = `<span style="font-size:14px;color:var(--muted)">Olá, <b style="color:var(--ink)">${esc(st.usuario.split(' ')[0])}</b></span>
+      <button data-acao="sair-usuario" class="btn" style="padding:5px 10px;font-size:13px">Sair</button>`;
+  } else {
+    el.innerHTML = `<button data-acao="login-usuario" class="btn pri" style="padding:6px 12px;font-size:14px">Entrar</button>`;
+  }
+}
+
 function render(){
   if (!DB) return;
   const rota = parseHash();
@@ -410,10 +434,29 @@ function render(){
   const troca = $('#troca');
   troca.textContent = emAdmin ? 'Ver a programação' : 'Área do administrador';
   troca.href = emAdmin ? '#' : '#admin';
+  renderTopoUsuario();
   if (emAdmin) renderAdmin();
   else if (rota.area === 'modulo') renderModulo(rota.mod);
   else renderHub();
   document.title = emAdmin ? 'Administração · Programação' : 'Programação da congregação';
+}
+
+function renderLoginUsuario(){
+  $('#app').innerHTML = `
+    <section class="painel" style="max-width:380px;margin:30px auto">
+      <h2>Entrar</h2>
+      <p style="color:var(--muted);margin-top:-4px">Use seu nome e o PIN pessoal que o administrador forneceu.</p>
+      <div class="grade" style="margin-top:14px">
+        <div class="campo"><label for="u-nome">Seu nome</label>
+          <select id="u-nome"><option value="">— selecione —</option>${DB.pessoas.filter(p=>p.pin).map(p=>`<option value="${esc(p.nome)}">${esc(p.nome)}</option>`).join('')}</select></div>
+        <div class="campo"><label for="u-pin">PIN pessoal</label>
+          <input id="u-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password">
+          <div class="dica">4 dígitos fornecidos pelo administrador. Sem PIN? Fale com ele.</div></div>
+      </div>
+      <button class="btn pri" style="width:100%;margin-top:14px" data-acao="confirmar-login-usuario">Entrar</button>
+      <button class="btn" style="width:100%;margin-top:8px" data-acao="continuar-sem-login">Ver a programação sem entrar</button>
+    </section>`;
+  setTimeout(() => { const s = $('#u-nome'); if (s) s.focus(); }, 50);
 }
 
 /* ============================================================ hub e busca global */
@@ -486,11 +529,14 @@ function buscaGlobal(filtro){
 }
 
 function renderHub(){
+  // Se usuário logado, pré-preenche a busca com o nome dele
+  if (st.usuario && !st.filtroHub) st.filtroHub = st.usuario;
+  const logado = !!st.usuario;
   $('#app').innerHTML = `
     <div class="busca">
-      <label for="busca-hub">Minhas designações em todas as áreas</label>
-      <input id="busca-hub" type="search" list="pessoas-hub" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtroHub)}">
-      ${st.filtroHub ? '<button class="limpar" data-acao="limpar-hub" aria-label="Limpar busca">×</button>' : ''}
+      <label for="busca-hub">${logado ? 'Suas designações em todas as áreas' : 'Minhas designações em todas as áreas'}</label>
+      <input id="busca-hub" type="search" list="pessoas-hub" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtroHub)}" ${logado?'readonly':''}>
+      ${st.filtroHub && !logado ? '<button class="limpar" data-acao="limpar-hub" aria-label="Limpar busca">×</button>' : ''}
       <datalist id="pessoas-hub">${todasPessoas().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
     </div>
     <div id="resultado-hub"></div>
@@ -549,13 +595,17 @@ function renderModuloLimpeza(){
 
 function renderModuloRelatorios(){
   const mesAtual = mesAtualISO();
+  const logado = !!st.usuario;
+  const campoNome = logado
+    ? `<div class="campo"><label for="rl-nome">Seu nome</label><input id="rl-nome" value="${esc(st.usuario)}" readonly style="opacity:.7"><div class="dica">Identificado como ${esc(st.usuario)}.</div></div>`
+    : `<div class="campo"><label for="rl-nome">Seu nome</label><select id="rl-nome">${opcoesPessoasComRotulo('— selecione —','')}</select><div class="dica">Entre com seu PIN para não precisar selecionar.</div></div>`;
   $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
     <section class="painel">
       <h2>Enviar meu relatório</h2>
       <div class="grade">
         <div class="campo"><label for="rl-mes">Mês</label><input id="rl-mes" type="month" min="${mesAtual}" max="${mesAtual}" value="${mesAtual}">
           <div class="dica">Só é possível enviar o relatório do mês atual. Meses anteriores ficam disponíveis só para consulta, logo abaixo.</div></div>
-        <div class="campo"><label for="rl-nome">Seu nome</label><select id="rl-nome">${opcoesPessoasComRotulo('— selecione —','')}</select></div>
+        ${campoNome}
       </div>
       <div class="campo" style="margin-top:10px"><label>Este mês você foi</label>
         <div class="radios">
@@ -570,7 +620,8 @@ function renderModuloRelatorios(){
       </div>
       <button class="btn pri" style="margin-top:14px" data-acao="enviar-relatorio">Enviar relatório</button>
     </section>
-    <section class="painel" style="margin-top:16px" id="meus-relatorios"><h2>Seus relatórios enviados</h2><p style="color:var(--muted)">Selecione seu nome acima para ver o histórico.</p></section>`;
+    <section class="painel" style="margin-top:16px" id="meus-relatorios"><h2>Seus relatórios enviados</h2><p style="color:var(--muted)">${logado ? 'Carregando…' : 'Selecione seu nome acima para ver o histórico.'}</p></section>`;
+  if (logado) atualizarMeusRelatorios();
 }
 function atualizarCampoHoras(){
   const t = document.querySelector('input[name="rl-tipo"]:checked');
@@ -725,13 +776,14 @@ function renderAdminPessoas(){
     <td>${x.id}</td>
     <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="nome" value="${esc(x.nome)}" placeholder="Nome completo"></td>
     <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="grupo" value="${esc(x.grupo||'')}" list="grupos-existentes" placeholder="Ex.: Grupo 1"></td>
+    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="pin" value="${esc(x.pin||'')}" inputmode="numeric" maxlength="8" placeholder="4 dígitos" style="width:90px"></td>
     ${FUNCOES.map(fn => `<td class="centro"><input type="checkbox" data-tab="pessoas" data-i="${i}" data-k="${fn.k}" ${x[fn.k]?'checked':''} aria-label="${esc(x.nome)||'publicador'} — ${fn.label}"></td>`).join('')}
     <td><button class="btn ico perigo" data-acao="remover-linha" data-tab="pessoas" data-i="${i}" aria-label="Remover ${esc(x.nome)||'publicador'}">✕</button></td></tr>`;
   $('#app').innerHTML = `<a class="voltar" href="#admin">← Painel</a>
     <section class="painel">
       <div class="linha-acoes"><h2>Cadastro de publicadores</h2><button class="btn" data-acao="sair">Sair</button></div>
-      <p style="color:var(--muted);margin-top:-4px">Esse cadastro alimenta as listas de designação nas seis áreas. Marque as funções em que cada um pode ser escalado — sem marcação, o nome não aparece na caixa de escolha daquela função.</p>
-      <div class="tabela-edit"><table><thead><tr><th>ID</th><th>Nome do publicador</th><th>Grupo</th>${FUNCOES.map(fn => `<th>${esc(fn.label)}</th>`).join('')}<th></th></tr></thead>
+      <p style="color:var(--muted);margin-top:-4px">O PIN permite que cada irmão entre no app com seu nome e PIN pessoal. Sem PIN, ele pode ver a programação mas não entra como usuário identificado.</p>
+      <div class="tabela-edit"><table><thead><tr><th>ID</th><th>Nome do publicador</th><th>Grupo</th><th>PIN</th>${FUNCOES.map(fn => `<th>${esc(fn.label)}</th>`).join('')}<th></th></tr></thead>
       <tbody>${linhas.map(linha).join('') || ''}</tbody></table></div>
       <datalist id="grupos-existentes">${gruposUnicos().map(g => `<option value="${esc(g)}">`).join('')}</datalist>
       <div class="linha-acoes" style="margin-top:4px">
@@ -968,6 +1020,25 @@ document.addEventListener('click', e => {
     case 'semana': st.semana = id; renderConteudoMS(); if (b.closest('.minhas')) document.querySelector('.semana')?.scrollIntoView({ behavior:'smooth', block:'start' }); break;
     case 'limpar': st.filtro = ''; renderModuloMS(); break;
     case 'limpar-hub': st.filtroHub = ''; renderHub(); break;
+    case 'login-usuario': renderLoginUsuario(); break;
+    case 'confirmar-login-usuario': {
+      const nome = ($('#u-nome')||{}).value;
+      const pin  = ($('#u-pin')||{}).value;
+      if (!nome){ toast('Selecione seu nome'); break; }
+      if (!pin){ toast('Digite o PIN'); break; }
+      if (checarPinUsuario(nome, pin)){
+        st.usuario = nome; sessaoUsuario(nome);
+        st.filtroHub = nome;
+        location.hash = '';
+        render();
+        toast('Bem-vindo(a), ' + nome.split(' ')[0] + '!');
+      } else {
+        toast('PIN incorreto. Fale com o administrador.');
+        const el = $('#u-pin'); if (el){ el.value = ''; el.focus(); }
+      }
+      break; }
+    case 'continuar-sem-login': location.hash = ''; render(); break;
+    case 'sair-usuario': st.usuario = ''; st.filtroHub = ''; sessaoUsuario(''); render(); break;
     case 'login': {
       const pin = $('#pin').value.trim();
       const r = checarPin(pin);
@@ -995,7 +1066,7 @@ document.addEventListener('click', e => {
       DB.config.congregacao = $('#cfg-nome').value.trim(); DB.config.pinMestre = pin;
       HUB_DEFS.forEach(h => { const el = $('#cfg-pin-'+h.key); if (el) DB.config.pins[h.key] = el.value.trim(); });
       salvarComFeedback(b, 'Configurações salvas', true); break; }
-    case 'add-pessoa': { const prox = DB.pessoas.length ? Math.max(...DB.pessoas.map(x => x.id)) + 1 : 1; DB.pessoas.push({ id:prox, nome:'', grupo:'', podePresidente:false, podeDirigenteEstudo:false, podeVolante:false, podeIndicador:false, podeMesa:false, podeLeitorSentinela:false, podeLeitorEstudo:false }); render(); break; }
+    case 'add-pessoa': { const prox = DB.pessoas.length ? Math.max(...DB.pessoas.map(x => x.id)) + 1 : 1; DB.pessoas.push({ id:prox, nome:'', grupo:'', pin:'', podePresidente:false, podeDirigenteEstudo:false, podeVolante:false, podeIndicador:false, podeMesa:false, podeLeitorSentinela:false, podeLeitorEstudo:false }); render(); break; }
     case 'add-linha': DB[b.dataset.tab].push(linhaVaziaTabela(b.dataset.tab)); render(); break;
     case 'remover-linha': DB[b.dataset.tab].splice(i,1); render(); break;
     case 'salvar-tabela': salvarComFeedback(b, 'Alterações salvas', false); break;

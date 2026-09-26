@@ -55,6 +55,7 @@ function montarDB_(){
 
   const pessoas = lerAba_(ABAS.pessoas).map(l => ({
     id: Number(l.ID), nome: paraTexto_(l.Nome), grupo: paraTexto_(l.Grupo),
+    pin: paraTexto_(l.PIN),
     podePresidente: paraBool_(l.PodePresidente), podeDirigenteEstudo: paraBool_(l.PodeDirigenteEstudo),
     podeVolante: paraBool_(l.PodeVolante), podeIndicador: paraBool_(l.PodeIndicador),
     podeMesa: paraBool_(l.PodeMesa), podeLeitorSentinela: paraBool_(l.PodeLeitorSentinela),
@@ -119,9 +120,9 @@ function salvarPorEscopo_(escopo, dados){
       dados.relatorios.map(x => [x.id, x.mesAno, x.nome, x.tipo, x.horaCampo, x.estudos, x.status]));
   }
   if (escopo === 'todos'){
-    const pesLin = dados.pessoas.map(p => [p.id, p.nome, p.grupo, paraSimNao_(p.podePresidente), paraSimNao_(p.podeDirigenteEstudo),
+    const pesLin = dados.pessoas.map(p => [p.id, p.nome, p.grupo, p.pin||'', paraSimNao_(p.podePresidente), paraSimNao_(p.podeDirigenteEstudo),
       paraSimNao_(p.podeVolante), paraSimNao_(p.podeIndicador), paraSimNao_(p.podeMesa), paraSimNao_(p.podeLeitorSentinela), paraSimNao_(p.podeLeitorEstudo)]);
-    escreverAba_(ABAS.pessoas, ['ID','Nome','Grupo','PodePresidente','PodeDirigenteEstudo','PodeVolante','PodeIndicador','PodeMesa','PodeLeitorSentinela','PodeLeitorEstudo'], pesLin);
+    escreverAba_(ABAS.pessoas, ['ID','Nome','Grupo','PIN','PodePresidente','PodeDirigenteEstudo','PodeVolante','PodeIndicador','PodeMesa','PodeLeitorSentinela','PodeLeitorEstudo'], pesLin);
     const cfgLin = [['congregacao', dados.config.congregacao], ['pinMestre', dados.config.pinMestre]];
     for (const k in dados.config.pins) cfgLin.push(['pin_'+k, dados.config.pins[k]]);
     escreverAba_(ABAS.config, ['Chave','Valor'], cfgLin);
