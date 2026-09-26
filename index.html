@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Programação da congregação</title>
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,600;7..72,700&display=swap">
@@ -668,11 +669,14 @@ function atualizarMeusRelatorios(){
 /* ============================================================ Reunião de meio de semana — visão pública */
 function renderModuloMS(){
   const focoId = consumirFoco('ms'); if (focoId) st.semana = focoId;
+  // Se logado, usa o nome do usuário e trava o campo
+  if (st.usuario) st.filtro = st.usuario;
+  const logado = !!st.usuario;
   $('#app').innerHTML = `<a class="voltar" href="#">← Início</a>
     <div class="busca">
       <label for="busca">Suas designações nesta área</label>
-      <input id="busca" type="search" list="pessoas-ms" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtro)}">
-      ${st.filtro ? '<button class="limpar" data-acao="limpar" aria-label="Limpar busca">×</button>' : ''}
+      <input id="busca" type="search" list="pessoas-ms" autocomplete="off" placeholder="Digite seu nome" value="${esc(st.filtro)}" ${logado ? 'readonly' : ''}>
+      ${st.filtro && !logado ? '<button class="limpar" data-acao="limpar" aria-label="Limpar busca">×</button>' : ''}
       <datalist id="pessoas-ms">${todasPessoas().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
     </div>
     <div id="conteudo-ms"></div>`;
@@ -1045,7 +1049,7 @@ document.addEventListener('click', e => {
   switch (a){
     case 'foco': st.foco = { mod:b.dataset.mod, id:b.dataset.id }; if (b.dataset.mod === 'ms') st.semana = b.dataset.id; break;
     case 'semana': st.semana = id; renderConteudoMS(); if (b.closest('.minhas')) document.querySelector('.semana')?.scrollIntoView({ behavior:'smooth', block:'start' }); break;
-    case 'limpar': st.filtro = ''; renderModuloMS(); break;
+    case 'limpar': if (!st.usuario){ st.filtro = ''; renderModuloMS(); } break;
     case 'limpar-hub': st.filtroHub = ''; renderHub(); break;
     case 'login-usuario': renderLoginUsuario(); break;
     case 'confirmar-login-usuario': {
