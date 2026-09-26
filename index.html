@@ -383,10 +383,20 @@ function sessaoUsuario(v){
   } catch(e){}
   return v;
 }
+// Hash SHA-256 do PIN — o valor gravado na planilha nunca é o PIN em texto puro
+async function hashPin(pin){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(pin).trim()));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 function checarPinUsuario(nome, pin){
   if (!nome || !pin) return false;
   const p = DB.pessoas.find(x => x.nome === nome);
-  return p && p.pin && String(p.pin).trim() === String(pin).trim();
+  if (!p) return false;
+  // PIN inicial (texto puro — comparação direta, só usado uma vez)
+  if (p.pinInicial && String(p.pinInicial).trim() === String(pin).trim()) return 'primeiro';
+  // PIN pessoal (hash — comparação acontece de forma assíncrona, ver case de login)
+  return 'verificar';
 }
 function checarPin(pin){
   pin = (pin||'').trim(); if (!pin) return '';
@@ -445,18 +455,33 @@ function renderLoginUsuario(){
   $('#app').innerHTML = `
     <section class="painel" style="max-width:380px;margin:30px auto">
       <h2>Entrar</h2>
-      <p style="color:var(--muted);margin-top:-4px">Use seu nome e o PIN pessoal que o administrador forneceu.</p>
+      <p style="color:var(--muted);margin-top:-4px">Use seu nome e o PIN fornecido pelo administrador. Na primeira entrada você vai criar seu PIN pessoal.</p>
       <div class="grade" style="margin-top:14px">
         <div class="campo"><label for="u-nome">Seu nome</label>
-          <select id="u-nome"><option value="">— selecione —</option>${DB.pessoas.filter(p=>p.pin).map(p=>`<option value="${esc(p.nome)}">${esc(p.nome)}</option>`).join('')}</select></div>
-        <div class="campo"><label for="u-pin">PIN pessoal</label>
+          <select id="u-nome"><option value="">— selecione —</option>${DB.pessoas.filter(p=>p.pin||p.pinInicial).map(p=>`<option value="${esc(p.nome)}">${esc(p.nome)}</option>`).join('')}</select></div>
+        <div class="campo"><label for="u-pin">PIN</label>
           <input id="u-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password">
-          <div class="dica">4 dígitos fornecidos pelo administrador. Sem PIN? Fale com ele.</div></div>
+          <div class="dica">PIN fornecido pelo administrador. Na primeira entrada você vai criar o seu.</div></div>
       </div>
       <button class="btn pri" style="width:100%;margin-top:14px" data-acao="confirmar-login-usuario">Entrar</button>
       <button class="btn" style="width:100%;margin-top:8px" data-acao="continuar-sem-login">Ver a programação sem entrar</button>
     </section>`;
   setTimeout(() => { const s = $('#u-nome'); if (s) s.focus(); }, 50);
+}
+
+function renderCriarPin(nome){
+  $('#app').innerHTML = `
+    <section class="painel" style="max-width:380px;margin:30px auto">
+      <h2>Crie seu PIN pessoal</h2>
+      <p style="color:var(--muted);margin-top:-4px">É o primeiro acesso de <b>${esc(nome.split(' ')[0])}</b>. Escolha um PIN de 4 dígitos que só você vai saber.</p>
+      <div class="grade" style="margin-top:14px">
+        <div class="campo"><label for="pin-novo">Novo PIN (4 dígitos)</label>
+          <input id="pin-novo" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" autofocus></div>
+        <div class="campo"><label for="pin-conf">Confirme o PIN</label>
+          <input id="pin-conf" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password"></div>
+      </div>
+      <button class="btn pri" style="width:100%;margin-top:14px" data-acao="salvar-pin-novo" data-nome="${esc(nome)}">Salvar PIN e entrar</button>
+    </section>`;
 }
 
 /* ============================================================ hub e busca global */
@@ -777,14 +802,15 @@ function renderAdminPessoas(){
     <td>${x.id}</td>
     <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="nome" value="${esc(x.nome)}" placeholder="Nome completo"></td>
     <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="grupo" value="${esc(x.grupo||'')}" list="grupos-existentes" placeholder="Ex.: Grupo 1"></td>
-    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="pin" value="${esc(x.pin||'')}" inputmode="numeric" maxlength="8" placeholder="4 dígitos" style="width:90px"></td>
+    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="pin" value="${esc(x.pin||'')}" inputmode="numeric" maxlength="8" placeholder="PIN pessoal" style="width:90px" title="PIN pessoal (definido pelo próprio irmão)"></td>
+    <td><input type="text" data-tab="pessoas" data-i="${i}" data-k="pinInicial" value="${esc(x.pinInicial||'')}" inputmode="numeric" maxlength="8" placeholder="PIN inicial" style="width:90px" title="PIN inicial que o admin define — apagado após primeiro acesso"></td>
     ${FUNCOES.map(fn => `<td class="centro"><input type="checkbox" data-tab="pessoas" data-i="${i}" data-k="${fn.k}" ${x[fn.k]?'checked':''} aria-label="${esc(x.nome)||'publicador'} — ${fn.label}"></td>`).join('')}
     <td><button class="btn ico perigo" data-acao="remover-linha" data-tab="pessoas" data-i="${i}" aria-label="Remover ${esc(x.nome)||'publicador'}">✕</button></td></tr>`;
   $('#app').innerHTML = `<a class="voltar" href="#admin">← Painel</a>
     <section class="painel">
       <div class="linha-acoes"><h2>Cadastro de publicadores</h2><button class="btn" data-acao="sair">Sair</button></div>
-      <p style="color:var(--muted);margin-top:-4px">O PIN permite que cada irmão entre no app com seu nome e PIN pessoal. Sem PIN, ele pode ver a programação mas não entra como usuário identificado.</p>
-      <div class="tabela-edit"><table><thead><tr><th>ID</th><th>Nome do publicador</th><th>Grupo</th><th>PIN</th>${FUNCOES.map(fn => `<th>${esc(fn.label)}</th>`).join('')}<th></th></tr></thead>
+      <p style="color:var(--muted);margin-top:-4px">O <b>PIN inicial</b> é definido pelo admin e entregue ao irmão. Na primeira entrada, ele cria o <b>PIN pessoal</b> (que só ele sabe). Sem PIN inicial, o irmão não consegue entrar.</p>
+      <div class="tabela-edit"><table><thead><tr><th>ID</th><th>Nome do publicador</th><th>Grupo</th><th>PIN pessoal</th><th>PIN inicial</th>${FUNCOES.map(fn => `<th>${esc(fn.label)}</th>`).join('')}<th></th></tr></thead>
       <tbody>${linhas.map(linha).join('') || ''}</tbody></table></div>
       <datalist id="grupos-existentes">${gruposUnicos().map(g => `<option value="${esc(g)}">`).join('')}</datalist>
       <div class="linha-acoes" style="margin-top:4px">
@@ -1027,16 +1053,53 @@ document.addEventListener('click', e => {
       const pin  = ($('#u-pin')||{}).value;
       if (!nome){ toast('Selecione seu nome'); break; }
       if (!pin){ toast('Digite o PIN'); break; }
-      if (checarPinUsuario(nome, pin)){
-        st.usuario = nome; sessaoUsuario(nome);
-        st.filtroHub = nome;
-        location.hash = '';
-        render();
-        toast('Bem-vindo(a), ' + nome.split(' ')[0] + '!');
-      } else {
-        toast('PIN incorreto. Fale com o administrador.');
-        const el = $('#u-pin'); if (el){ el.value = ''; el.focus(); }
+      const pessoa = DB.pessoas.find(x => x.nome === nome);
+      if (!pessoa){ toast('Nome não encontrado'); break; }
+      // Primeiro acesso — PIN inicial em texto puro
+      if (pessoa.pinInicial && String(pessoa.pinInicial).trim() === String(pin).trim()){
+        renderCriarPin(nome); break;
       }
+      // PIN pessoal — compara o hash
+      b.disabled = true;
+      hashPin(pin).then(h => {
+        if (pessoa.pin && pessoa.pin === h){
+          st.usuario = nome; sessaoUsuario(nome);
+          st.filtroHub = nome;
+          location.hash = '';
+          render();
+          toast('Bem-vindo(a), ' + nome.split(' ')[0] + '!');
+        } else {
+          toast('PIN incorreto. Fale com o administrador.');
+          const el = $('#u-pin'); if (el){ el.value = ''; el.focus(); }
+        }
+      }).finally(() => { b.disabled = false; });
+      break; }
+    case 'salvar-pin-novo': {
+      const nome = b.dataset.nome;
+      const pinNovo = ($('#pin-novo')||{}).value;
+      const pinConf = ($('#pin-conf')||{}).value;
+      if (!pinNovo || pinNovo.length < 4){ toast('Digite um PIN de 4 dígitos'); break; }
+      if (pinNovo !== pinConf){ toast('Os PINs não coincidem'); break; }
+      b.disabled = true;
+      hashPin(pinNovo).then(h => {
+        // Grava o hash (não o PIN em texto) na planilha
+        return fetch(API_URL, {
+          method:'POST',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify({ acao:'trocarPin', nome, pinHash: h })
+        }).then(r=>r.json());
+      }).then(j => {
+        if (j.ok){
+          // Atualiza localmente com o hash
+          const pessoa = DB.pessoas.find(x => x.nome === nome);
+          if (pessoa){ pessoa.pin = j.pinHash||''; pessoa.pinInicial = ''; }
+          st.usuario = nome; sessaoUsuario(nome);
+          st.filtroHub = nome;
+          location.hash = '';
+          render();
+          toast('PIN criado! Bem-vindo(a), ' + nome.split(' ')[0] + '!');
+        } else { toast('Erro ao salvar PIN: ' + (j.erro||'tente de novo')); }
+      }).catch(()=>toast('Não foi possível salvar o PIN. Tente de novo.')).finally(()=>{ b.disabled = false; });
       break; }
     case 'continuar-sem-login': location.hash = ''; render(); break;
     case 'sair-usuario': st.usuario = ''; st.filtroHub = ''; sessaoUsuario(''); render(); break;
