@@ -629,9 +629,10 @@ function atualizarCampoHoras(){
 }
 function atualizarMeusRelatorios(){
   const alvo = $('#meus-relatorios'); if (!alvo) return;
-  const nome = ($('#rl-nome')||{}).value || '';
+  // Usa o nome do usuário logado; se não logado, usa o select
+  const nome = st.usuario || ($('#rl-nome')||{}).value || '';
   if (!nome){ alvo.innerHTML = '<h2>Seus relatórios enviados</h2><p style="color:var(--muted)">Selecione seu nome acima para ver o histórico.</p>'; return; }
-  const meus = DB.relatorios.filter(r => casa(r.nome, nome)).sort((a,b) => b.mesAno.localeCompare(a.mesAno));
+  const meus = DB.relatorios.filter(r => r.mesAno && casa(r.nome, nome)).sort((a,b) => b.mesAno.localeCompare(a.mesAno));
   alvo.innerHTML = '<h2>Seus relatórios enviados</h2>' + (meus.length
     ? `<div class="rolagem"><table><thead><tr><th>Mês</th><th>Tipo</th><th>Horas</th><th>Estudos</th><th>Status</th></tr></thead><tbody>${
         meus.map(r => `<tr><td>${esc(mesAnoLegivel(r.mesAno))}</td><td>${esc(r.tipo)}</td><td>${r.horaCampo||'—'}</td><td>${r.estudos||'—'}</td><td><span class="pill ${r.status==='Validado'?'pill-validado':'pill-entregue'}">${esc(r.status)}</span></td></tr>`).join('')
@@ -1076,11 +1077,17 @@ document.addEventListener('click', e => {
     case 'alternar-status': { const r = DB.relatorios.find(x => x.id === b.dataset.rid); if (r){ r.status = r.status === 'Validado' ? 'Entregue' : 'Validado'; salvarComFeedback(b, 'Status atualizado', true); } break; }
     case 'salvar-relatorios': salvarComFeedback(b, 'Alterações salvas', false); break;
     case 'enviar-relatorio': {
-      const mesAno = $('#rl-mes').value, nome = $('#rl-nome').value;
+      // Quando logado, o campo mês é um input readonly — pegar o valor atual
+      const mesEl = $('#rl-mes');
+      const mesAno = (mesEl && mesEl.value) ? mesEl.value : mesAtualISO();
+      // Nome: se logado usa st.usuario; senão usa o select
+      const nomeEl = $('#rl-nome');
+      const nome = st.usuario || (nomeEl && nomeEl.value) || '';
       const mesAtual = mesAtualISO();
       if (!nome){ toast('Selecione o seu nome'); break; }
       if (mesAno !== mesAtual){ toast('Só é possível enviar o relatório do mês atual.'); break; }
-      const tipoEl = document.querySelector('input[name="rl-tipo"]:checked'); const tipo = tipoEl ? tipoEl.value : 'Publicador';
+      const tipoEl = document.querySelector('input[name="rl-tipo"]:checked');
+      const tipo = tipoEl ? tipoEl.value : 'Publicador';
       const horaCampo = tipo !== 'Publicador' ? (Number($('#rl-horas').value)||0) : '';
       const estudos = $('#rl-estudos').value ? Number($('#rl-estudos').value) : '';
       const registro = { mesAno, nome, tipo, horaCampo, estudos };
