@@ -249,8 +249,8 @@ const Dados = {
       const nome = '_cb' + Date.now();
       const script = document.createElement('script');
       const timer = setTimeout(() => {
-        cleanup(); reject(new Error('A planilha demorou demais. Verifique sua conexão.'));
-      }, 20000);
+        cleanup(); reject(new Error('A planilha demorou demais. Tente de novo — a primeira abertura pode ser mais lenta.'));
+      }, 45000);
       function cleanup(){ delete window[nome]; script.remove(); clearTimeout(timer); }
       window[nome] = data => {
         cleanup();
@@ -1212,7 +1212,12 @@ window.addEventListener('hashchange', () => { st.draft = null; st.editId = null;
 
 /* ============================================================ carregamento inicial */
 async function iniciar(){
-  $('#app').innerHTML = '<div class="painel"><p>Carregando dados…</p></div>';
+  $('#app').innerHTML = `<div class="painel" style="text-align:center;padding:32px 16px">
+    <div style="font-size:36px;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div>
+    <p style="font-weight:700;margin:0 0 6px">Carregando dados…</p>
+    <p style="color:var(--muted);font-size:14px;margin:0">A primeira abertura pode levar alguns segundos.</p>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
   try {
     DB = await Dados.carregar();
     render();
