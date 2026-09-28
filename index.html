@@ -19,7 +19,7 @@
   --tes:#56666F; --min:#9A6D12; --vid:#842A31;
   --tes-t:#46565F; --min-t:#8A600C; --vid-t:#842A31;
   --hl:#FFF4CF; --mark:#FFE08A; --foco:#2F6FB3;
-  --c-ms:#842A31; --c-fs:#2F6F82; --c-av:#B58124; --c-in:#3E7D52; --c-lp:#5B6672; --c-rm:#7A4A78;
+  --c-ms:#842A31; --c-fs:#2F6F82; --c-av:#B58124; --c-in:#3E7D52; --c-dc:#3D5A99; --c-lp:#5B6672; --c-rm:#7A4A78;
   --verde:#3D8F5E;
   --font:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
   --serif:'Literata',Georgia,'Times New Roman',serif;
@@ -211,6 +211,7 @@ const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','ag
 const HUB_DEFS = [
   { key:'ms', titulo:'Reunião de meio de semana', cor:'var(--c-ms)' },
   { key:'fs', titulo:'Reunião de fim de semana', cor:'var(--c-fs)' },
+  { key:'dc', titulo:'Dirigentes de campo', cor:'var(--c-dc)' },
   { key:'av', titulo:'Áudio, vídeo e volantes', cor:'var(--c-av)' },
   { key:'in', titulo:'Indicadores', cor:'var(--c-in)' },
   { key:'lp', titulo:'Limpeza semanal e periódica', cor:'var(--c-lp)' },
@@ -224,7 +225,9 @@ const MODULOS_SIMPLES = {
   av: { titulo:'Áudio, vídeo e volantes', tabela:'multimidia', comDiaSemana:true, campos:[
         { k:'mesa', label:'Mesa (multimídia)', tipo:'pessoa', flag:'podeMesa' }, { k:'volante1', label:'Volante 1', tipo:'pessoa', flag:'podeVolante' }, { k:'volante2', label:'Volante 2', tipo:'pessoa', flag:'podeVolante' } ] },
   in: { titulo:'Indicadores', tabela:'indicadores', comDiaSemana:true, campos:[
-        { k:'indicador1', label:'Indicador 1', tipo:'pessoa', flag:'podeIndicador' }, { k:'indicador2', label:'Indicador 2', tipo:'pessoa', flag:'podeIndicador' } ] }
+        { k:'indicador1', label:'Indicador 1', tipo:'pessoa', flag:'podeIndicador' }, { k:'indicador2', label:'Indicador 2', tipo:'pessoa', flag:'podeIndicador' } ] },
+  dc: { titulo:'Dirigentes de campo', tabela:'dirigentesCampo', comDiaSemana:true, campos:[
+        { k:'nome', label:'Dirigente de campo', tipo:'pessoa', flag:'podePresidente' } ] }
 };
 
 const p = (secao, titulo, min, tipo, nome, ajudante='') => ({ secao, titulo, min, tipo, nome, ajudante });
@@ -544,6 +547,9 @@ function buscaGlobal(filtro){
   DB.indicadores.forEach(x => {
     if (casa(x.indicador1, f) || casa(x.indicador2, f)) out.push({ mod:'in', data:x.data, papel:'Indicador', oque:'Indicador da reunião', rot:dataCurta(x.data) });
   });
+  DB.dirigentesCampo.forEach(x => {
+    if (casa(x.nome, f)) out.push({ mod:'dc', data:x.data, papel:'Dirigente de campo', oque:'Dirigente de campo do fim de semana', rot:dataCurta(x.data) });
+  });
   DB.limpezaSemanal.forEach(x => {
     if (casa(x.grupo, f)) out.push({ mod:'lp', data:x.data, papel:'Limpeza', oque:'Limpeza semanal do salão', rot:dataCurta(x.data) });
   });
@@ -857,6 +863,7 @@ function linhaVaziaTabela(tabela){
     case 'fimDeSemana': return { data:prox(), presidente:'', leitor:'' };
     case 'multimidia': return { data:prox(), mesa:'', volante1:'', volante2:'' };
     case 'indicadores': return { data:prox(), indicador1:'', indicador2:'' };
+    case 'dirigentesCampo': return { data:prox(), nome:'' };
     case 'limpezaSemanal': return { data:prox(), grupo:'' };
   }
 }
